@@ -38,6 +38,8 @@ public class ChessGame {
         BLACK
     }
 
+
+
     /**
      * Gets all valid moves for a piece at the given location
      *
@@ -46,13 +48,11 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        ArrayList<ChessMove> validMoves = new ArrayList<ChessMove>();
-        ChessPiece piece = board.getPiece(startPosition);
-        switch (piece.getPieceType()) {
-            case PAWN:
-//                if (board.isEmpty(ChessPosition(startPosition.getRow(),startPosition.getColumn())))
-
+        var piece = getBoard().getPiece(startPosition);
+        if (getBoard().getPiece(startPosition) == null) {
+            return null;
         }
+        Collection<ChessMove> validMoves = piece.pieceMoves(getBoard(),startPosition);
         return validMoves;
 //        throw new RuntimeException("Not implemented");
     }
@@ -104,7 +104,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        this.board = board;
     }
 
     /**
@@ -113,6 +113,7 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return board;
     }
+
 }
