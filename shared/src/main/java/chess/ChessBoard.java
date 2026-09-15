@@ -1,5 +1,8 @@
 package chess;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class ChessBoard {
     public static final int width = 8;
     public static final int height = 8;
@@ -60,22 +63,36 @@ public class ChessBoard {
                 ChessPiece.PieceType.BISHOP, ChessPiece.PieceType.QUEEN,
                 ChessPiece.PieceType.KING, ChessPiece.PieceType.BISHOP,
                 ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.ROOK};
-        assert(backRow.length == width);
+        assert (backRow.length == width);
 
         // Put white pieces in the right position
         for (int i = 1; i <= width; i++) {
-            addPiece(new ChessPosition(1,i),new ChessPiece(ChessGame.TeamColor.WHITE,backRow[i-1]));
+            addPiece(new ChessPosition(1, i), new ChessPiece(ChessGame.TeamColor.WHITE, backRow[i - 1]));
         }
         for (int i = 1; i <= width; i++) {
-            addPiece(new ChessPosition(2,i),new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+            addPiece(new ChessPosition(2, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
         }
 
         // Put black pieces in the right position
         for (int i = 1; i <= width; i++) {
-            addPiece(new ChessPosition(height,i),new ChessPiece(ChessGame.TeamColor.BLACK,backRow[i-1]));
+            addPiece(new ChessPosition(height, i), new ChessPiece(ChessGame.TeamColor.BLACK, backRow[i - 1]));
         }
         for (int i = 1; i <= width; i++) {
-            addPiece(new ChessPosition(height-1,i),new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+            addPiece(new ChessPosition(height - 1, i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessBoard that = (ChessBoard) o;
+        return Objects.deepEquals(pieces, that.pieces);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(pieces);
     }
 }
