@@ -1,6 +1,7 @@
-package chess;
+package chess.MoveValidators;
 
-import java.util.ArrayList;
+import chess.*;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -22,4 +23,5 @@ public class ClassicChessMoveValidator implements ChessMoveValidator {
             return -1;
         }
     }
+
 }

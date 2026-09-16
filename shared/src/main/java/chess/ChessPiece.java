@@ -1,5 +1,7 @@
 package chess;
 
+import chess.MoveValidators.*;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
@@ -64,14 +66,37 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return new ArrayList<>();
+        switch (type) {
+            case PAWN:
+                return new ClassicChessPawnMoveValidator().getValidMoves(myPosition, board);
+            case ROOK:
+                return new ClassicChessRookMoveValidator().getValidMoves(myPosition, board);
+            case KNIGHT:
+                return new ClassicChessKnightMoveValidator().getValidMoves(myPosition, board);
+            case BISHOP:
+                return new ClassicChessBishopMoveValidator().getValidMoves(myPosition, board);
+            case QUEEN:
+                return new ClassicChessQueenMoveValidator().getValidMoves(myPosition, board);
+            case KING:
+                return new ClassicChessKingMoveValidator().getValidMoves(myPosition, board);
+            default:
+                return new ArrayList<>();
+        }
     }
 
     public int getStartingRow() {
         if (getTeamColor() == ChessGame.TeamColor.BLACK) {
-            return ChessBoard.height;
+            return type == PieceType.PAWN ? ChessBoard.height - 1 : ChessBoard.height;
         }else {
+            return type == PieceType.PAWN ? 2 : 1;
+        }
+    }
+
+    public int getPromotionRow() {
+        if (teamColor == ChessGame.TeamColor.BLACK) {
             return 1;
+        }else {
+            return ChessBoard.height;
         }
     }
 }
