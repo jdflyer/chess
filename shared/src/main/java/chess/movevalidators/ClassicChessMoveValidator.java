@@ -1,10 +1,8 @@
-package chess.MoveValidators;
+package chess.movevalidators;
 
 import chess.*;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public abstract class ClassicChessMoveValidator implements ChessMoveValidator {
     @Override
@@ -23,10 +21,12 @@ public abstract class ClassicChessMoveValidator implements ChessMoveValidator {
         }
     }
 
-    protected void walkBoard(ChessPosition startPosition, ChessPosition endPosition, ChessBoard board ,ChessPiece piece, Collection<ChessMove> refValidMoves) {
+    protected void walkBoard(ChessPosition startPosition, ChessPosition endPosition, ChessBoard board ,
+                             ChessPiece piece, Collection<ChessMove> refValidMoves) {
         int rowDirection = Integer.signum(endPosition.getRow()-startPosition.getRow());
         int colDirection = Integer.signum(endPosition.getColumn()-startPosition.getColumn());
-        for (int r = startPosition.getRow()+rowDirection, c = startPosition.getColumn()+colDirection; r > 0 && r <= ChessBoard.height && c > 0 && c <= ChessBoard.width; r += rowDirection, c += colDirection) {
+        for (int r = startPosition.getRow()+rowDirection, c = startPosition.getColumn()+colDirection;
+             r > 0 && r <= ChessBoard.HEIGHT && c > 0 && c <= ChessBoard.WIDTH; r += rowDirection, c += colDirection) {
             ChessPosition newPos = new ChessPosition(r,c);
             ChessPiece testPiece = board.getPiece(newPos);
             if (testPiece != null) {
@@ -45,6 +45,17 @@ public abstract class ClassicChessMoveValidator implements ChessMoveValidator {
             return true;
         }
         return myPiece.getTeamColor() != other.getTeamColor();
+    }
+
+    protected void checkValidOffsets(ChessPosition[] offsetArray, ChessPosition startPosition, ChessPiece piece,
+                                     ChessBoard board, Collection<ChessMove> refValidMoves) {
+        for (ChessPosition offset : offsetArray) {
+            ChessPosition testPos = startPosition.getOffset(offset.getRow(),offset.getColumn());
+
+            if (testPos.isValid() && canTake(piece,board.getPiece(testPos))) {
+                refValidMoves.add(new ChessMove(startPosition,testPos));
+            }
+        }
     }
 
 }

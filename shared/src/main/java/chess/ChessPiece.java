@@ -1,6 +1,6 @@
 package chess;
 
-import chess.MoveValidators.*;
+import chess.movevalidators.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -86,7 +86,7 @@ public class ChessPiece {
 
     public int getStartingRow() {
         if (getTeamColor() == ChessGame.TeamColor.BLACK) {
-            return type == PieceType.PAWN ? ChessBoard.height - 1 : ChessBoard.height;
+            return type == PieceType.PAWN ? ChessBoard.HEIGHT - 1 : ChessBoard.HEIGHT;
         }else {
             return type == PieceType.PAWN ? 2 : 1;
         }
@@ -96,7 +96,7 @@ public class ChessPiece {
         if (teamColor == ChessGame.TeamColor.BLACK) {
             return 1;
         }else {
-            return ChessBoard.height;
+            return ChessBoard.HEIGHT;
         }
     }
 }

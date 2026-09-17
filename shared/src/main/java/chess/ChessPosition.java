@@ -41,7 +41,7 @@ public class ChessPosition {
      * @return true if position is in bounds of the field
      */
     public boolean isValid() {
-        return row >= 1 && col >= 1 && row <= ChessBoard.height && col <= ChessBoard.width;
+        return row >= 1 && col >= 1 && row <= ChessBoard.HEIGHT && col <= ChessBoard.WIDTH;
     }
 
     @Override

@@ -4,13 +4,13 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class ChessBoard {
-    public static final int width = 8;
-    public static final int height = 8;
+    public static final int WIDTH = 8;
+    public static final int HEIGHT = 8;
 
     ChessPiece[][] pieces;
 
     public ChessBoard() {
-        pieces = new ChessPiece[height][width];
+        pieces = new ChessPiece[HEIGHT][WIDTH];
     }
 
     /**
@@ -58,27 +58,28 @@ public class ChessBoard {
      */
     public void resetBoard() {
         // Initialize the pieces to be a null board
-        pieces = new ChessPiece[height][width];
+        pieces = new ChessPiece[HEIGHT][WIDTH];
         final ChessPiece.PieceType[] backRow = {ChessPiece.PieceType.ROOK, ChessPiece.PieceType.KNIGHT,
                 ChessPiece.PieceType.BISHOP, ChessPiece.PieceType.QUEEN,
                 ChessPiece.PieceType.KING, ChessPiece.PieceType.BISHOP,
                 ChessPiece.PieceType.KNIGHT, ChessPiece.PieceType.ROOK};
-        assert (backRow.length == width);
+        assert (backRow.length == WIDTH);
 
         // Put white pieces in the right position
-        for (int i = 1; i <= width; i++) {
+        for (int i = 1; i <= WIDTH; i++) {
             addPiece(new ChessPosition(1, i), new ChessPiece(ChessGame.TeamColor.WHITE, backRow[i - 1]));
         }
-        for (int i = 1; i <= width; i++) {
+        for (int i = 1; i <= WIDTH; i++) {
             addPiece(new ChessPosition(2, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
         }
 
         // Put black pieces in the right position
-        for (int i = 1; i <= width; i++) {
-            addPiece(new ChessPosition(height, i), new ChessPiece(ChessGame.TeamColor.BLACK, backRow[i - 1]));
+        for (int i = 1; i <= WIDTH; i++) {
+            addPiece(new ChessPosition(HEIGHT, i), new ChessPiece(ChessGame.TeamColor.BLACK, backRow[i - 1]));
         }
-        for (int i = 1; i <= width; i++) {
-            addPiece(new ChessPosition(height - 1, i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+        for (int i = 1; i <= WIDTH; i++) {
+            addPiece(new ChessPosition(HEIGHT - 1, i),
+                    new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
         }
     }
 

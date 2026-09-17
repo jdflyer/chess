@@ -1,4 +1,4 @@
-package chess.MoveValidators;
+package chess.movevalidators;
 
 import chess.ChessBoard;
 import chess.ChessMove;
