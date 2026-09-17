@@ -30,11 +30,4 @@ public class ClassicChessKingMoveValidator extends ClassicChessMoveValidator {
         return validMoves;
     }
 
-    protected boolean canTake(ChessPiece myPiece, ChessPiece other) {
-        if (other == null) {
-            return true;
-        }
-        return myPiece.getTeamColor() != other.getTeamColor();
-    }
-
 }
