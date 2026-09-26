@@ -2,6 +2,7 @@ package chess.movevalidators;
 
 import chess.ChessBoard;
 import chess.ChessMove;
+import chess.ChessPiece;
 import chess.ChessPosition;
 
 import java.util.ArrayList;
@@ -9,15 +10,14 @@ import java.util.Collection;
 
 public class ClassicChessBishopMoveValidator extends ClassicChessMoveValidator {
     @Override
-    public Collection<ChessMove> getValidMoves(ChessPosition position, ChessBoard board) {
-        var piece = board.getPiece(position);
-        ArrayList<ChessMove> validMoves = new ArrayList<>();
+    public Collection<ChessMove> getValidMoves(ChessBoard board, ChessPosition position, ChessPiece piece) {
+        ArrayList<ChessMove> moves = new ArrayList<>();
 
-        walkBoard(position,position.getOffset(1,1),board,piece,validMoves);
-        walkBoard(position,position.getOffset(1,-1),board,piece,validMoves);
-        walkBoard(position,position.getOffset(-1,1),board,piece,validMoves);
-        walkBoard(position,position.getOffset(-1,-1),board,piece,validMoves);
+        walkBoard(board,piece,position,position.getOffset(1,1),moves);
+        walkBoard(board,piece,position,position.getOffset(-1,-1),moves);
+        walkBoard(board,piece,position,position.getOffset(-1,1),moves);
+        walkBoard(board,piece,position,position.getOffset(1,-1),moves);
 
-        return validMoves;
+        return moves;
     }
 }

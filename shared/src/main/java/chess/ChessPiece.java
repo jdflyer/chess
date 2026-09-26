@@ -66,19 +66,20 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+        ChessPiece piece = board.getPiece(myPosition);
         switch (type) {
             case PAWN:
-                return new ClassicChessPawnMoveValidator().getValidMoves(myPosition, board);
+                return new ClassicChessPawnMoveValidator().getValidMoves(board, myPosition, piece);
             case ROOK:
-                return new ClassicChessRookMoveValidator().getValidMoves(myPosition, board);
+                return new ClassicChessRookMoveValidator().getValidMoves(board, myPosition, piece);
             case KNIGHT:
-                return new ClassicChessKnightMoveValidator().getValidMoves(myPosition, board);
+                return new ClassicChessKnightMoveValidator().getValidMoves(board, myPosition, piece);
             case BISHOP:
-                return new ClassicChessBishopMoveValidator().getValidMoves(myPosition, board);
+                return new ClassicChessBishopMoveValidator().getValidMoves(board, myPosition, piece);
             case QUEEN:
-                return new ClassicChessQueenMoveValidator().getValidMoves(myPosition, board);
+                return new ClassicChessQueenMoveValidator().getValidMoves(board, myPosition, piece);
             case KING:
-                return new ClassicChessKingMoveValidator().getValidMoves(myPosition, board);
+                return new ClassicChessKingMoveValidator().getValidMoves(board, myPosition, piece);
             default:
                 return new ArrayList<>();
         }

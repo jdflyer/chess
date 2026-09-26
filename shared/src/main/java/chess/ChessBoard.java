@@ -21,6 +21,10 @@ public class ChessBoard {
         return getPiece(position) == null;
     }
 
+    public boolean isValidPosition(ChessPosition pos) {
+        return pos.getRow() > 0 && pos.getRow() <= HEIGHT && pos.getColumn() > 0 && pos.getColumn() <= WIDTH;
+    }
+
     /**
      *
      * @param position  the piece to check if we can take

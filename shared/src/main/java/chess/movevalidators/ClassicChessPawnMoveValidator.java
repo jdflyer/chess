@@ -1,50 +1,63 @@
 package chess.movevalidators;
 
-import chess.ChessBoard;
-import chess.ChessMove;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 public class ClassicChessPawnMoveValidator extends ClassicChessMoveValidator {
+    public static int getPawnForwardDir(ChessPiece piece) {
+        return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 1 : -1;
+    }
+
+    public static int getPawnStartRow(ChessPiece piece, ChessBoard board) {
+        return piece.getTeamColor() == ChessGame.TeamColor.WHITE ? 2 : ChessBoard.HEIGHT - 1;
+    }
+
+
     @Override
-    public Collection<ChessMove> getValidMoves(ChessPosition position, ChessBoard board) {
-        var piece = board.getPiece(position);
-        int forwardDir = getForwardDirection(piece);
-        ArrayList<ChessMove> validMoves = new ArrayList<>();
+    public Collection<ChessMove> getValidMoves(ChessBoard board, ChessPosition position, ChessPiece piece) {
+        ArrayList<ChessMove> moves = new ArrayList<>();
 
-        ArrayList<ChessPiece.PieceType> pawnPromotions = new ArrayList<>();
+        boolean canPromote = (piece.getTeamColor() == ChessGame.TeamColor.WHITE &&
+                position.getRow() == ChessBoard.HEIGHT-1) ||
+                (piece.getTeamColor() == ChessGame.TeamColor.BLACK && position.getRow() == 2);
 
-        if (position.getRow() + getForwardDirection(piece) ==  piece.getPromotionRow()) {
-            pawnPromotions.add(ChessPiece.PieceType.ROOK);
-            pawnPromotions.add(ChessPiece.PieceType.KNIGHT);
-            pawnPromotions.add(ChessPiece.PieceType.BISHOP);
-            pawnPromotions.add(ChessPiece.PieceType.QUEEN);
-        }else{
-            pawnPromotions.add(null);
+        ArrayList<ChessPiece.PieceType> typesToTest = new ArrayList<>();
+        if (canPromote) {
+            typesToTest.add(ChessPiece.PieceType.ROOK);
+            typesToTest.add(ChessPiece.PieceType.BISHOP);
+            typesToTest.add(ChessPiece.PieceType.KNIGHT);
+            typesToTest.add(ChessPiece.PieceType.QUEEN);
+        }else {
+            typesToTest.add(null);
         }
 
-        for (ChessPiece.PieceType promotion : pawnPromotions) {
-            var above = position.getOffset(forwardDir, 0);
-            if (above.isValid() && board.isEmpty(above)) {
-                validMoves.add(new ChessMove(position, above, promotion));
-                above = above.getOffset(forwardDir,0);
-                if (above.isValid() && piece.getStartingRow() == position.getRow() && board.isEmpty(above)) {
-                    validMoves.add(new ChessMove(position, above));
+        for (ChessPiece.PieceType promotionType : typesToTest) {
+            ChessPosition testPos = position.getOffset(getPawnForwardDir(piece),0);
+            if (getPawnStartRow(piece,board) == position.getRow() && testPosition(board,piece,testPos) == TakeCondition.NO_PIECE) {
+                testPos = position.getOffset(getPawnForwardDir(piece)*2,0);
+                if (board.isValidPosition(testPos) && testPosition(board,piece,testPos) == TakeCondition.NO_PIECE) {
+                    moves.add(new ChessMove(position,testPos,promotionType));
                 }
             }
-            var left = position.getOffset(forwardDir,-1);
-            if (left.isValid() && !board.isEmpty(left) && board.canTake(left, piece.getTeamColor())) {
-                validMoves.add(new ChessMove(position, left, promotion));
+
+            testPos = position.getOffset(getPawnForwardDir(piece),0);
+            if (testPosition(board,piece,testPos) == TakeCondition.NO_PIECE) {
+                moves.add(new ChessMove(position,testPos,promotionType));
             }
-            var right = position.getOffset(forwardDir,1);
-            if (right.isValid() && !board.isEmpty(right) && board.canTake(right, piece.getTeamColor())) {
-                validMoves.add(new ChessMove(position, right, promotion));
+
+            testPos = position.getOffset(getPawnForwardDir(piece),1);
+            if (testPosition(board,piece,testPos) == TakeCondition.OTHER_TEAM) {
+                moves.add(new ChessMove(position,testPos,promotionType));
+            }
+
+            testPos = position.getOffset(getPawnForwardDir(piece),-1);
+            if (testPosition(board,piece,testPos) == TakeCondition.OTHER_TEAM) {
+                moves.add(new ChessMove(position,testPos,promotionType));
             }
         }
 
-        return validMoves;
+        return moves;
     }
 }

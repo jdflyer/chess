@@ -2,16 +2,35 @@ package chess.movevalidators;
 
 import chess.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public abstract class ClassicChessMoveValidator implements ChessMoveValidator {
     @Override
     public boolean isValid(ChessPiece piece, ChessMove move, ChessBoard board) {
-        return getValidMoves(move.getStartPosition(), board).contains(move);
+        return getValidMoves(board, move.getStartPosition(), board.getPiece(move.getStartPosition())).contains(move);
     }
 
     @Override
-    public abstract Collection<ChessMove> getValidMoves(ChessPosition position, ChessBoard board);
+    public abstract Collection<ChessMove> getValidMoves(ChessBoard board, ChessPosition position, ChessPiece piece);
+
+    public enum TakeCondition {
+        NO_PIECE,
+        SAME_TEAM,
+        OTHER_TEAM,
+        OUT_OF_BOUNDS
+    };
+
+    public TakeCondition testPosition(ChessBoard board, ChessPiece piece, ChessPosition pos) {
+        if (!board.isValidPosition(pos)) {
+            return TakeCondition.OUT_OF_BOUNDS;
+        }
+        ChessPiece other = board.getPiece(pos);
+        if (other == null) {
+            return TakeCondition.NO_PIECE;
+        }
+        return other.getTeamColor() == piece.getTeamColor() ? TakeCondition.SAME_TEAM : TakeCondition.OTHER_TEAM;
+    }
 
     protected int getForwardDirection(ChessPiece piece) {
         if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
@@ -21,41 +40,34 @@ public abstract class ClassicChessMoveValidator implements ChessMoveValidator {
         }
     }
 
-    protected void walkBoard(ChessPosition startPosition, ChessPosition endPosition, ChessBoard board ,
-                             ChessPiece piece, Collection<ChessMove> refValidMoves) {
-        int rowDirection = Integer.signum(endPosition.getRow()-startPosition.getRow());
-        int colDirection = Integer.signum(endPosition.getColumn()-startPosition.getColumn());
-        for (int r = startPosition.getRow()+rowDirection, c = startPosition.getColumn()+colDirection;
-             r > 0 && r <= ChessBoard.HEIGHT && c > 0 && c <= ChessBoard.WIDTH; r += rowDirection, c += colDirection) {
-            ChessPosition newPos = new ChessPosition(r,c);
-            ChessPiece testPiece = board.getPiece(newPos);
-            if (testPiece != null) {
-                if (testPiece.getTeamColor() != piece.getTeamColor()) {
-                    refValidMoves.add(new ChessMove(startPosition, newPos));
-                }
-                break;
-            }else {
-                refValidMoves.add(new ChessMove(startPosition, newPos));
+    protected void walkBoard(ChessBoard board, ChessPiece piece, ChessPosition startPosition,
+                             ChessPosition endPosition,
+                             ArrayList<ChessMove> outValidMoves) {
+        int rowDir = Integer.signum(startPosition.getRow()-endPosition.getRow());
+        int colDir = Integer.signum(startPosition.getColumn()-endPosition.getColumn());
+        for (int r = startPosition.getRow()+rowDir, c = startPosition.getColumn()+colDir; r>0 &&
+                r<= ChessBoard.WIDTH &&c>0&&c<= ChessBoard.WIDTH ; r += rowDir,c += colDir) {
+            ChessPosition testPos = new ChessPosition(r,c);
+            TakeCondition cond = testPosition(board,piece,testPos);
+            if (cond == TakeCondition.SAME_TEAM || cond == TakeCondition.OUT_OF_BOUNDS) {
+                return;
+            }
+            outValidMoves.add(new ChessMove(startPosition,testPos,null));
+            if (cond == TakeCondition.OTHER_TEAM) {
+                return;
             }
         }
     }
 
-    protected boolean canTake(ChessPiece myPiece, ChessPiece other) {
-        if (other == null) {
-            return true;
-        }
-        return myPiece.getTeamColor() != other.getTeamColor();
-    }
-
-    protected void checkValidOffsets(ChessPosition[] offsetArray, ChessPosition startPosition, ChessPiece piece,
-                                     ChessBoard board, Collection<ChessMove> refValidMoves) {
-        for (ChessPosition offset : offsetArray) {
-            ChessPosition testPos = startPosition.getOffset(offset.getRow(),offset.getColumn());
-
-            if (testPos.isValid() && canTake(piece,board.getPiece(testPos))) {
-                refValidMoves.add(new ChessMove(startPosition,testPos));
+    protected void checkValidOffsets(ChessBoard board, ChessPosition startPos, ChessPiece piece,
+                                     ChessPosition[] offsets, ArrayList<ChessMove> outMoves) {
+        for (ChessPosition offset : offsets) {
+            ChessPosition testPos = startPos.getOffset(offset.getRow(),offset.getColumn());
+            TakeCondition cond = testPosition(board,piece,testPos);
+            if (cond == TakeCondition.SAME_TEAM || cond == TakeCondition.OUT_OF_BOUNDS) {
+                continue;
             }
+            outMoves.add(new ChessMove(startPos,testPos,null));
         }
     }
-
 }
