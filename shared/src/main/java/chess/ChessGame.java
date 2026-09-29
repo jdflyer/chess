@@ -11,7 +11,9 @@ public class ChessGame {
     TeamColor currentTurn;
 
     public ChessGame() {
-
+        board = new ChessBoard();
+        board.resetBoard();
+        currentTurn = TeamColor.WHITE;
     }
 
     /**
@@ -38,8 +40,6 @@ public class ChessGame {
         BLACK
     }
 
-
-
     /**
      * Gets all valid moves for a piece at the given location
      *
@@ -52,9 +52,7 @@ public class ChessGame {
         if (getBoard().getPiece(startPosition) == null) {
             return null;
         }
-        Collection<ChessMove> validMoves = piece.pieceMoves(getBoard(),startPosition);
-        return validMoves;
-//        throw new RuntimeException("Not implemented");
+        return piece.pieceMoves(getBoard(),startPosition);
     }
 
     /**
@@ -64,7 +62,12 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        if (!board.isValidPosition(move.getStartPosition()) || !board.isValidPosition(move.getEndPosition())) {
+            throw new InvalidMoveException("Move start/end position is out of bounds of the board!");
+        }
+        ChessPiece startPiece = board.getPiece(move.getStartPosition());
+        board.addPiece(move.getEndPosition(), new ChessPiece(startPiece.teamColor,move.getPromotionPiece()));
+        board.addPiece(move.getStartPosition(),null);
     }
 
     /**
