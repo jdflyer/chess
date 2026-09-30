@@ -2,6 +2,7 @@ package chess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * A class that can manage a chess game, making moves on a board
@@ -37,6 +38,28 @@ public class ChessGame {
      */
     public void setTeamTurn(TeamColor team) {
         currentTurn = team;
+    }
+
+    @Override
+    public String toString() {
+        return "ChessGame{" +
+                "board=\n" + board +
+                ", currentTurn=" + currentTurn +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return Objects.equals(board, chessGame.board) && currentTurn == chessGame.currentTurn;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(board, currentTurn);
     }
 
     /**
@@ -82,6 +105,9 @@ public class ChessGame {
             throw new InvalidMoveException("Move start/end position is out of bounds of the board!");
         }
         ChessPiece piece = getBoard().getPiece(move.getStartPosition());
+        if (piece == null) {
+            throw new InvalidMoveException("The piece at the move's start position is null!");
+        }
         ChessPiece endPiece = board.getPiece(move.getEndPosition());
         if (endPiece != null && endPiece.getTeamColor() == piece.getTeamColor()) {
             throw new InvalidMoveException("Attempted to take a piece of the same color!");

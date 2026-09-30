@@ -1,9 +1,6 @@
 package chess;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Objects;
+import java.util.*;
 
 public class ChessBoard {
     public static final int WIDTH = 8;
@@ -53,7 +50,10 @@ public class ChessBoard {
     // Moves a piece according to a given ChessMove
     public void movePiece(ChessMove move) {
         ChessPiece piece = getPiece(move.getStartPosition());
-        addPiece(move.getStartPosition(),piece);
+        if (piece == null) {
+            return;
+        }
+        addPiece(move.getStartPosition(),null);
         addPiece(move.getEndPosition(), move.getPromotionPiece()==null ? piece : new ChessPiece(piece.getTeamColor(),move.getPromotionPiece()));
     }
 
@@ -134,5 +134,36 @@ public class ChessBoard {
             }
         }
         return positions;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder boardString = new StringBuilder();
+        for (int r = 1; r <= HEIGHT; r++) {
+            boardString.append('|');
+            for (int c = 1; c <= WIDTH; c++) {
+                String pieceChar;
+                ChessPiece piece = getPiece(new ChessPosition(r,c));
+                if (piece == null) {
+                    boardString.append(" |");
+                    continue;
+                }
+                pieceChar = switch (piece.getPieceType()) {
+                    case PAWN -> "p";
+                    case ROOK -> "r";
+                    case KNIGHT -> "n";
+                    case BISHOP -> "b";
+                    case QUEEN -> "q";
+                    case KING -> "k";
+                };
+                if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+                    pieceChar = pieceChar.toUpperCase(Locale.ROOT);
+                }
+                boardString.append(pieceChar);
+                boardString.append('|');
+            }
+            boardString.append('\n');
+        }
+        return boardString.toString();
     }
 }
