@@ -23,8 +23,11 @@ public class ChessGame {
         return currentTurn;
     }
 
+    public TeamColor getOpposingTeamTurn(TeamColor team) {
+        return team == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+    }
     public TeamColor getOpposingTeamTurn() {
-        return getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+        return getOpposingTeamTurn(getTeamTurn());
     }
 
     /**
@@ -74,6 +77,42 @@ public class ChessGame {
         board.addPiece(move.getStartPosition(),null);
     }
 
+    ChessPosition getKingPosition(ChessBoard board, TeamColor color) {
+        Collection<ChessPosition> kingPositions = board.getAllPiecePositionsByPieceTypeAndColor(ChessPiece.PieceType.KING, color);
+        assert(kingPositions.size() == 1);
+        return kingPositions.iterator().next();
+    }
+    ChessPosition getKingPosition(TeamColor color) {
+        return getKingPosition(getBoard(),color);
+    }
+    ChessPosition getKingPosition() {
+        return getKingPosition(getTeamTurn());
+    }
+
+    public Collection<ChessPosition> getPiecePositionsThatCanAttackKing(ChessBoard board, TeamColor color) {
+        Collection<ChessPosition> opposingTeamPiecePositions = board.getAllPiecePositionsByColor(getOpposingTeamTurn(color));
+
+        ChessPosition kingPosition = getKingPosition(board,color);
+
+        ArrayList<ChessPosition> piecePositionsThatCanAttackKing = new ArrayList<>();
+
+        for (ChessPosition position : opposingTeamPiecePositions) {
+            ChessPiece piece = board.getPiece(position);
+            Collection<ChessMove> validMoves = piece.pieceMoves(board,position);
+            for (ChessMove move : validMoves) {
+                if (move.getEndPosition() == kingPosition) {
+                    piecePositionsThatCanAttackKing.add(move.getStartPosition());
+                }
+            }
+        }
+
+        return piecePositionsThatCanAttackKing;
+    }
+
+    public Collection<ChessPosition> getPiecePositionsThatCanAttackKing(TeamColor color) {
+        return getPiecePositionsThatCanAttackKing(getBoard(), color);
+    }
+
     /**
      * Determines if the given team is in check
      *
@@ -81,22 +120,7 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        Collection<ChessPosition> opposingTeamPiecePositions = getBoard().getAllPiecePositionsByColor(getOpposingTeamTurn());
-
-        Collection<ChessPosition> kingPositions = getBoard().getAllPiecePositionsByPieceTypeAndColor(ChessPiece.PieceType.KING, getTeamTurn());
-        assert(kingPositions.size() == 1);
-        ChessPosition kingPosition = kingPositions.iterator().next();
-
-        for (ChessPosition position : opposingTeamPiecePositions) {
-            ChessPiece piece = getBoard().getPiece(position);
-            Collection<ChessMove> validMoves = piece.pieceMoves(getBoard(),position);
-            for (ChessMove move : validMoves) {
-                if (move.getEndPosition() == kingPosition) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return !getPiecePositionsThatCanAttackKing(teamColor).isEmpty();
     }
 
     /**
@@ -106,7 +130,28 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessPiece> piecePositionsThatCanAttackKing = getPiecePositionsThatCanAttackKing(teamColor);
+        if (piecePositionsThatCanAttackKing.isEmpty()) {
+            return false;
+        }
+        ChessPosition kingPosition = getKingPosition();
+
+        Collection<ChessPosition> myTeamPiecePositions = getBoard().getAllPiecePositionsByColor(getTeamTurn());
+        for (ChessPosition position : myTeamPiecePositions) {
+            ChessPiece piece = getBoard().getPiece(position);
+            Collection<ChessMove> validMoves = piece.pieceMoves(getBoard(),position);
+            for (ChessMove move : validMoves) {
+                ChessBoard testBoard = new ChessBoard(getBoard());
+                testBoard.addPiece(move.getEndPosition(),piece);
+                testBoard.addPiece(move.getStartPosition(),piece);
+                // Evaluate if king is in danger after the result of the new move
+                Collection<ChessPosition> testPositionsThreateningKing = getPiecePositionsThatCanAttackKing(testBoard,teamColor);
+                if (testPositionsThreateningKing.isEmpty()) {
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
     /**

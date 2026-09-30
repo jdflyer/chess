@@ -14,6 +14,9 @@ public class ChessBoard {
     public ChessBoard() {
         pieces = new ChessPiece[HEIGHT][WIDTH];
     }
+    public ChessBoard(ChessBoard other) {
+        this.pieces =  other.pieces.clone();
+    }
 
     /**
      *
