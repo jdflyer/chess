@@ -23,6 +23,10 @@ public class ChessGame {
         return currentTurn;
     }
 
+    public TeamColor getOpposingTeamTurn() {
+        return getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE;
+    }
+
     /**
      * Sets which teams turn it is
      *
@@ -77,7 +81,22 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessPosition> opposingTeamPiecePositions = getBoard().getAllPiecePositionsByColor(getOpposingTeamTurn());
+
+        Collection<ChessPosition> kingPositions = getBoard().getAllPiecePositionsByPieceTypeAndColor(ChessPiece.PieceType.KING, getTeamTurn());
+        assert(kingPositions.size() == 1);
+        ChessPosition kingPosition = kingPositions.iterator().next();
+
+        for (ChessPosition position : opposingTeamPiecePositions) {
+            ChessPiece piece = getBoard().getPiece(position);
+            Collection<ChessMove> validMoves = piece.pieceMoves(getBoard(),position);
+            for (ChessMove move : validMoves) {
+                if (move.getEndPosition() == kingPosition) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

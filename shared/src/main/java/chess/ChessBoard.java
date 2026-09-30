@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 
 public class ChessBoard {
@@ -99,5 +101,28 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(pieces);
+    }
+
+    public Collection<ChessPosition> getAllPiecePositionsByColor(ChessGame.TeamColor color) {
+        return getAllPiecePositionsByPieceTypeAndColor(null, color);
+    }
+
+    // Returns all pieces if type is null
+    public Collection<ChessPosition> getAllPiecePositionsByPieceTypeAndColor(ChessPiece.PieceType type, ChessGame.TeamColor color) {
+        // We should probably have a reference in the board to all pieces by color, but for now we can just
+        // iterate over all pieces of the opposite color to get a set of possible moves.
+        ArrayList<ChessPosition> positions = new ArrayList<>();
+        for (int r = 1; r <= HEIGHT; r++) {
+            for (int c = 1; c <= WIDTH; c++) {
+                ChessPosition position = new ChessPosition(r,c);
+                ChessPiece piece = getPiece(position);
+                if (piece != null && piece.getTeamColor() == color) {
+                    if (type == null || piece.getPieceType() == type) {
+                        positions.add(position);
+                    }
+                }
+            }
+        }
+        return positions;
     }
 }
