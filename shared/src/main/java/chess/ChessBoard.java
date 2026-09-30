@@ -50,6 +50,13 @@ public class ChessBoard {
         pieces[position.getRow()-1][position.getColumn()-1] = piece;
     }
 
+    // Moves a piece according to a given ChessMove
+    public void movePiece(ChessMove move) {
+        ChessPiece piece = getPiece(move.getStartPosition());
+        addPiece(move.getStartPosition(),piece);
+        addPiece(move.getEndPosition(), move.getPromotionPiece()==null ? piece : new ChessPiece(piece.getTeamColor(),move.getPromotionPiece()));
+    }
+
     /**
      * Gets a chess piece on the chessboard
      *

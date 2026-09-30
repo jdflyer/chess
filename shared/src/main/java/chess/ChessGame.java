@@ -55,11 +55,20 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        var piece = getBoard().getPiece(startPosition);
+        ChessPiece piece = getBoard().getPiece(startPosition);
         if (getBoard().getPiece(startPosition) == null) {
             return null;
         }
-        return piece.pieceMoves(getBoard(),startPosition);
+        Collection<ChessMove> possibleMoves = piece.pieceMoves(getBoard(),startPosition);
+        ArrayList<ChessMove> validMoves = new ArrayList<>();
+        for (ChessMove move : possibleMoves) {
+            ChessBoard testBoard = new ChessBoard(getBoard());
+            testBoard.movePiece(move);
+            if (!isInCheck(testBoard,piece.getTeamColor())) {
+                validMoves.add(move);
+            }
+        }
+        return validMoves;
     }
 
     /**
@@ -72,9 +81,18 @@ public class ChessGame {
         if (!board.isValidPosition(move.getStartPosition()) || !board.isValidPosition(move.getEndPosition())) {
             throw new InvalidMoveException("Move start/end position is out of bounds of the board!");
         }
-        ChessPiece startPiece = board.getPiece(move.getStartPosition());
-        board.addPiece(move.getEndPosition(), new ChessPiece(startPiece.teamColor,move.getPromotionPiece()));
-        board.addPiece(move.getStartPosition(),null);
+        ChessPiece piece = getBoard().getPiece(move.getStartPosition());
+        ChessPiece endPiece = board.getPiece(move.getEndPosition());
+        if (endPiece != null && endPiece.getTeamColor() == piece.getTeamColor()) {
+            throw new InvalidMoveException("Attempted to take a piece of the same color!");
+        }
+        ChessBoard testBoard = new ChessBoard(getBoard());
+        testBoard.movePiece(move);
+        if (isInCheck(testBoard,piece.getTeamColor())) {
+            throw new InvalidMoveException("Attempted to make a move that would result in the king being in check!");
+        }
+        board.movePiece(move);
+        setTeamTurn(getOpposingTeamTurn());
     }
 
     ChessPosition getKingPosition(ChessBoard board, TeamColor color) {
@@ -119,8 +137,11 @@ public class ChessGame {
      * @param teamColor which team to check for check
      * @return True if the specified team is in check
      */
+    public boolean isInCheck(ChessBoard board, TeamColor teamColor) {
+        return !getPiecePositionsThatCanAttackKing(board,teamColor).isEmpty();
+    }
     public boolean isInCheck(TeamColor teamColor) {
-        return !getPiecePositionsThatCanAttackKing(teamColor).isEmpty();
+        return isInCheck(getBoard(),teamColor);
     }
 
     /**
@@ -130,7 +151,10 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        Collection<ChessPiece> piecePositionsThatCanAttackKing = getPiecePositionsThatCanAttackKing(teamColor);
+        return isInCheckmate(getBoard(),teamColor);
+    }
+    public boolean isInCheckmate(ChessBoard board, TeamColor teamColor) {
+        Collection<ChessPosition> piecePositionsThatCanAttackKing = getPiecePositionsThatCanAttackKing(teamColor);
         if (piecePositionsThatCanAttackKing.isEmpty()) {
             return false;
         }
@@ -142,8 +166,7 @@ public class ChessGame {
             Collection<ChessMove> validMoves = piece.pieceMoves(getBoard(),position);
             for (ChessMove move : validMoves) {
                 ChessBoard testBoard = new ChessBoard(getBoard());
-                testBoard.addPiece(move.getEndPosition(),piece);
-                testBoard.addPiece(move.getStartPosition(),piece);
+                testBoard.movePiece(move);
                 // Evaluate if king is in danger after the result of the new move
                 Collection<ChessPosition> testPositionsThreateningKing = getPiecePositionsThatCanAttackKing(testBoard,teamColor);
                 if (testPositionsThreateningKing.isEmpty()) {
@@ -162,6 +185,9 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
+        return isInStalemate(getBoard(),teamColor);
+    }
+    public boolean isInStalemate(ChessBoard board, TeamColor teamColor) {
         if (isInCheck(teamColor)) {
             return false;
         }
