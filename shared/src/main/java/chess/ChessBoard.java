@@ -12,7 +12,12 @@ public class ChessBoard {
         pieces = new ChessPiece[HEIGHT][WIDTH];
     }
     public ChessBoard(ChessBoard other) {
-        this.pieces =  other.pieces.clone();
+        pieces = new ChessPiece[HEIGHT][WIDTH];
+        for (int r = 0; r < other.pieces.length; r++) {
+            for (int c = 0; c < other.pieces[r].length; c++) {
+                pieces[r][c] = other.pieces[r][c];
+            }
+        }
     }
 
     /**
@@ -139,7 +144,7 @@ public class ChessBoard {
     @Override
     public String toString() {
         StringBuilder boardString = new StringBuilder();
-        for (int r = 1; r <= HEIGHT; r++) {
+        for (int r = HEIGHT; r > 0; r--) {
             boardString.append('|');
             for (int c = 1; c <= WIDTH; c++) {
                 String pieceChar;
@@ -156,7 +161,7 @@ public class ChessBoard {
                     case QUEEN -> "q";
                     case KING -> "k";
                 };
-                if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+                if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
                     pieceChar = pieceChar.toUpperCase(Locale.ROOT);
                 }
                 boardString.append(pieceChar);

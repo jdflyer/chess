@@ -144,7 +144,7 @@ public class ChessGame {
             ChessPiece piece = board.getPiece(position);
             Collection<ChessMove> validMoves = piece.pieceMoves(board,position);
             for (ChessMove move : validMoves) {
-                if (move.getEndPosition() == kingPosition) {
+                if (move.getEndPosition().equals(kingPosition)) {
                     piecePositionsThatCanAttackKing.add(move.getStartPosition());
                 }
             }
@@ -184,14 +184,14 @@ public class ChessGame {
         if (piecePositionsThatCanAttackKing.isEmpty()) {
             return false;
         }
-        ChessPosition kingPosition = getKingPosition();
+        ChessPosition kingPosition = getKingPosition(board,teamColor);
 
-        Collection<ChessPosition> myTeamPiecePositions = getBoard().getAllPiecePositionsByColor(getTeamTurn());
+        Collection<ChessPosition> myTeamPiecePositions = board.getAllPiecePositionsByColor(teamColor);
         for (ChessPosition position : myTeamPiecePositions) {
-            ChessPiece piece = getBoard().getPiece(position);
-            Collection<ChessMove> validMoves = piece.pieceMoves(getBoard(),position);
+            ChessPiece piece = board.getPiece(position);
+            Collection<ChessMove> validMoves = piece.pieceMoves(board,position);
             for (ChessMove move : validMoves) {
-                ChessBoard testBoard = new ChessBoard(getBoard());
+                ChessBoard testBoard = new ChessBoard(board);
                 testBoard.movePiece(move);
                 // Evaluate if king is in danger after the result of the new move
                 Collection<ChessPosition> testPositionsThreateningKing = getPiecePositionsThatCanAttackKing(testBoard,teamColor);
@@ -200,7 +200,7 @@ public class ChessGame {
                 }
             }
         }
-        return false;
+        return true;
     }
 
     /**
@@ -219,8 +219,7 @@ public class ChessGame {
         }
         Collection<ChessPosition> teamPiecePositions = getBoard().getAllPiecePositionsByColor(teamColor);
         for (ChessPosition position : teamPiecePositions) {
-            ChessPiece piece = getBoard().getPiece(position);
-            if (!piece.pieceMoves(getBoard(),position).isEmpty()) {
+            if (!validMoves(position).isEmpty()) {
                 return false;
             }
         }
