@@ -58,6 +58,18 @@ public class ChessPiece {
         return type;
     }
 
+    ChessMoveValidator getValidator() {
+        return switch (type) {
+            case PAWN -> new ClassicChessPawnMoveValidator();
+            case ROOK -> new ClassicChessRookMoveValidator();
+            case KNIGHT -> new ClassicChessKnightMoveValidator();
+            case BISHOP -> new ClassicChessBishopMoveValidator();
+            case QUEEN -> new ClassicChessQueenMoveValidator();
+            case KING -> new ClassicChessKingMoveValidator();
+            default -> null;
+        };
+    }
+
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
@@ -67,22 +79,11 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         ChessPiece piece = board.getPiece(myPosition);
-        switch (type) {
-            case PAWN:
-                return new ClassicChessPawnMoveValidator().getValidMoves(board, myPosition, piece);
-            case ROOK:
-                return new ClassicChessRookMoveValidator().getValidMoves(board, myPosition, piece);
-            case KNIGHT:
-                return new ClassicChessKnightMoveValidator().getValidMoves(board, myPosition, piece);
-            case BISHOP:
-                return new ClassicChessBishopMoveValidator().getValidMoves(board, myPosition, piece);
-            case QUEEN:
-                return new ClassicChessQueenMoveValidator().getValidMoves(board, myPosition, piece);
-            case KING:
-                return new ClassicChessKingMoveValidator().getValidMoves(board, myPosition, piece);
-            default:
-                return new ArrayList<>();
+        ChessMoveValidator validator = getValidator();
+        if (validator != null) {
+            return validator.getValidMoves(board, myPosition, piece);
         }
+        return new ArrayList<>();
     }
 
     public int getStartingRow() {

@@ -108,6 +108,12 @@ public class ChessGame {
         if (piece == null) {
             throw new InvalidMoveException("The piece at the move's start position is null!");
         }
+        if (piece.getTeamColor() != getTeamTurn()) {
+            throw new InvalidMoveException("Attempted to move a piece who's turn it isn't!");
+        }
+        if (!piece.getValidator().isValid(piece,move,board)) {
+            throw new InvalidMoveException("Attempted to force-make a move that is not possible!");
+        }
         ChessPiece endPiece = board.getPiece(move.getEndPosition());
         if (endPiece != null && endPiece.getTeamColor() == piece.getTeamColor()) {
             throw new InvalidMoveException("Attempted to take a piece of the same color!");
