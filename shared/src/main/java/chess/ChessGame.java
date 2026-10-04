@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -11,10 +12,15 @@ public class ChessGame {
     ChessBoard board;
     TeamColor currentTurn;
 
+    // Starts as true for every team, but gets set to false when king or the right rook moves
+    boolean[] canCastleTeams;
+
     public ChessGame() {
         board = new ChessBoard();
         board.resetBoard();
         currentTurn = TeamColor.WHITE;
+        canCastleTeams = new boolean[TeamColor.values().length];
+        Arrays.fill(canCastleTeams,true);
     }
 
     /**
@@ -67,8 +73,8 @@ public class ChessGame {
      */
     public enum TeamColor {
         WHITE,
-        BLACK
-    }
+        BLACK,
+    };
 
     /**
      * Gets all valid moves for a piece at the given location
@@ -83,6 +89,16 @@ public class ChessGame {
             return null;
         }
         Collection<ChessMove> possibleMoves = piece.pieceMoves(getBoard(),startPosition);
+
+        if (canCastleTeams[getTeamTurn().ordinal()] && piece.getPieceType() == ChessPiece.PieceType.KING &&
+        startPosition.equals(new ChessPosition(getBoard().getStartingPiecesRow(getTeamTurn()),5))) {
+            int startRow = getBoard().getStartingPiecesRow(getTeamTurn());
+            if (getBoard().getPiece(new ChessPosition(startRow,6)) == null &&
+                    getBoard().getPiece(new ChessPosition(startRow,7)) == null) {
+                possibleMoves.add(new ChessMove(startPosition,new ChessPosition(startRow,8),null));
+            }
+        }
+
         ArrayList<ChessMove> validMoves = new ArrayList<>();
         for (ChessMove move : possibleMoves) {
             ChessBoard testBoard = new ChessBoard(getBoard());
@@ -91,7 +107,18 @@ public class ChessGame {
                 validMoves.add(move);
             }
         }
+
         return validMoves;
+    }
+
+    public boolean isValidMove(ChessMove move) {
+        Collection<ChessMove> validMoves = validMoves(move.getStartPosition());
+        for (ChessMove testMove : validMoves) {
+            if (testMove.equals(move)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -111,7 +138,7 @@ public class ChessGame {
         if (piece.getTeamColor() != getTeamTurn()) {
             throw new InvalidMoveException("Attempted to move a piece who's turn it isn't!");
         }
-        if (!piece.getValidator().isValid(piece,move,board)) {
+        if (!isValidMove(move)) {
             throw new InvalidMoveException("Attempted to force-make a move that is not possible!");
         }
         ChessPiece endPiece = board.getPiece(move.getEndPosition());
@@ -123,6 +150,19 @@ public class ChessGame {
         if (isInCheck(testBoard,piece.getTeamColor())) {
             throw new InvalidMoveException("Attempted to make a move that would result in the king being in check!");
         }
+
+        if (canCastleTeams[getTeamTurn().ordinal()] && piece.getPieceType() == ChessPiece.PieceType.KING &&
+        move.equals(new ChessMove(new ChessPosition(board.getStartingPiecesRow(getTeamTurn()),5),
+                new ChessPosition(board.getStartingPiecesRow(getTeamTurn()),8),null))) {
+            canCastleTeams[getTeamTurn().ordinal()] = false;
+            makeMove(new ChessMove(new ChessPosition(getBoard().getStartingPiecesRow(getTeamTurn()), 8),
+                    new ChessPosition(getBoard().getStartingPiecesRow(getTeamTurn()), 5), null));
+        }
+        if (canCastleTeams[getTeamTurn().ordinal()] &&
+                (piece.getPieceType() == ChessPiece.PieceType.KING || piece.getPieceType() == ChessPiece.PieceType.ROOK)) {
+            canCastleTeams[getTeamTurn().ordinal()] = false;
+        }
+
         board.movePiece(move);
         setTeamTurn(getOpposingTeamTurn());
     }

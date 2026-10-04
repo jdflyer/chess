@@ -12,11 +12,9 @@ public class ChessBoard {
         pieces = new ChessPiece[HEIGHT][WIDTH];
     }
     public ChessBoard(ChessBoard other) {
-        pieces = new ChessPiece[HEIGHT][WIDTH];
+        this();
         for (int r = 0; r < other.pieces.length; r++) {
-            for (int c = 0; c < other.pieces[r].length; c++) {
-                pieces[r][c] = other.pieces[r][c];
-            }
+            pieces[r] = other.pieces[r].clone();
         }
     }
 
@@ -40,6 +38,10 @@ public class ChessBoard {
      */
     public boolean canTake(ChessPosition position, ChessGame.TeamColor team) {
         return getPiece(position).getTeamColor() != team;
+    }
+
+    public int getStartingPiecesRow(ChessGame.TeamColor team) {
+        return team == ChessGame.TeamColor.BLACK ? HEIGHT : 1;
     }
 
     /**

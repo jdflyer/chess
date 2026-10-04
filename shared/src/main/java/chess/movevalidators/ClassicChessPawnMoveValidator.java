@@ -20,8 +20,9 @@ public class ClassicChessPawnMoveValidator extends ClassicChessMoveValidator {
         ArrayList<ChessMove> moves = new ArrayList<>();
 
         boolean canPromote = (piece.getTeamColor() == ChessGame.TeamColor.WHITE &&
-                position.getRow() == ChessBoard.HEIGHT-1) ||
-                (piece.getTeamColor() == ChessGame.TeamColor.BLACK && position.getRow() == 2);
+                position.getRow() == board.getStartingPiecesRow(ChessGame.TeamColor.BLACK)-1) ||
+                (piece.getTeamColor() == ChessGame.TeamColor.BLACK && position.getRow() ==
+                        board.getStartingPiecesRow(ChessGame.TeamColor.WHITE)+1);
 
         ArrayList<ChessPiece.PieceType> typesToTest = new ArrayList<>();
         if (canPromote) {
