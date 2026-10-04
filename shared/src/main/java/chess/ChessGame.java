@@ -12,15 +12,28 @@ public class ChessGame {
     ChessBoard board;
     TeamColor currentTurn;
 
-    // Starts as true for every team, but gets set to false when king or the right rook moves
-    boolean[] canCastleTeams;
+    // Helper class that keeps track of castle related pieces per-team
+    private static class CastleStatus {
+        boolean leftRookMoved;
+        boolean kingMoved;
+        boolean rightRookMoved;
+        CastleStatus(boolean leftRookMoved, boolean kingMoved, boolean rightRookMoved) {
+            this.leftRookMoved = leftRookMoved;
+            this.kingMoved = kingMoved;
+            this.rightRookMoved = rightRookMoved;
+        }
+        boolean canCastleLeft() {return !leftRookMoved && !kingMoved;}
+        boolean canCastleRight() {return !kingMoved && !rightRookMoved;}
+    }
+    CastleStatus[] canCastleTeams;
 
     public ChessGame() {
         board = new ChessBoard();
         board.resetBoard();
         currentTurn = TeamColor.WHITE;
-        canCastleTeams = new boolean[TeamColor.values().length];
-        Arrays.fill(canCastleTeams,true);
+
+        canCastleTeams = new CastleStatus[TeamColor.values().length];
+        Arrays.fill(canCastleTeams, new CastleStatus(false, false, false));
     }
 
     /**
@@ -90,12 +103,29 @@ public class ChessGame {
         }
         Collection<ChessMove> possibleMoves = piece.pieceMoves(getBoard(),startPosition);
 
-        if (canCastleTeams[getTeamTurn().ordinal()] && piece.getPieceType() == ChessPiece.PieceType.KING &&
-        startPosition.equals(new ChessPosition(getBoard().getStartingPiecesRow(getTeamTurn()),5))) {
+        // Handle castling first left then right
+        if (piece.getPieceType() == ChessPiece.PieceType.KING && !isInCheck(getBoard(), getTeamTurn())) {
             int startRow = getBoard().getStartingPiecesRow(getTeamTurn());
-            if (getBoard().getPiece(new ChessPosition(startRow,6)) == null &&
+            if (canCastleTeams[getTeamTurn().ordinal()].canCastleLeft() &&
+                    getBoard().getPiece(new ChessPosition(startRow,4)) == null &&
+                    getBoard().getPiece(new ChessPosition(startRow,3)) == null &&
+                    getBoard().getPiece(new ChessPosition(startRow,2)) == null) {
+                // Make sure the king won't be in check through the castle
+                ChessBoard testBoard = new ChessBoard(getBoard());
+                testBoard.movePiece(new ChessMove(startPosition,new ChessPosition(startRow,4),null));
+                if (!isInCheck(testBoard,getTeamTurn())) {
+                    possibleMoves.add(new ChessMove(startPosition,new ChessPosition(startRow,3),null));
+                }
+            }
+            if (canCastleTeams[getTeamTurn().ordinal()].canCastleRight() &&
+                    getBoard().getPiece(new ChessPosition(startRow,6)) == null &&
                     getBoard().getPiece(new ChessPosition(startRow,7)) == null) {
-                possibleMoves.add(new ChessMove(startPosition,new ChessPosition(startRow,8),null));
+                // Make sure the king won't be in check through the castle
+                ChessBoard testBoard = new ChessBoard(getBoard());
+                testBoard.movePiece(new ChessMove(startPosition,new ChessPosition(startRow,6),null));
+                if (!isInCheck(testBoard,getTeamTurn())) {
+                    possibleMoves.add(new ChessMove(startPosition, new ChessPosition(startRow, 7), null));
+                }
             }
         }
 
@@ -151,16 +181,40 @@ public class ChessGame {
             throw new InvalidMoveException("Attempted to make a move that would result in the king being in check!");
         }
 
-        if (canCastleTeams[getTeamTurn().ordinal()] && piece.getPieceType() == ChessPiece.PieceType.KING &&
-        move.equals(new ChessMove(new ChessPosition(board.getStartingPiecesRow(getTeamTurn()),5),
-                new ChessPosition(board.getStartingPiecesRow(getTeamTurn()),8),null))) {
-            canCastleTeams[getTeamTurn().ordinal()] = false;
-            makeMove(new ChessMove(new ChessPosition(getBoard().getStartingPiecesRow(getTeamTurn()), 8),
-                    new ChessPosition(getBoard().getStartingPiecesRow(getTeamTurn()), 5), null));
+        // Handle castling
+        CastleStatus castleStatus = canCastleTeams[getTeamTurn().ordinal()];
+        int startingRow = board.getStartingPiecesRow(getTeamTurn());
+        if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+            if (castleStatus.canCastleLeft() &&
+                    move.equals(new ChessMove(new ChessPosition(startingRow, 5), new ChessPosition(startingRow, 3), null)) &&
+                    getBoard().getPiece(new ChessPosition(startingRow, 2)) == null &&
+                    getBoard().getPiece(new ChessPosition(startingRow, 3)) == null &&
+                    getBoard().getPiece(new ChessPosition(startingRow, 4)) == null) {
+                // Move left rook
+                getBoard().movePiece(new ChessMove(new ChessPosition(startingRow, 1), new ChessPosition(startingRow, 4), null));
+                castleStatus.leftRookMoved = true;
+            } else if (castleStatus.canCastleRight() &&
+                    move.equals(new ChessMove(new ChessPosition(startingRow, 5), new ChessPosition(startingRow, 7), null)) &&
+                    getBoard().getPiece(new ChessPosition(startingRow, 6)) == null &&
+                    getBoard().getPiece(new ChessPosition(startingRow, 7)) == null) {
+                // Move right rook
+                getBoard().movePiece(new ChessMove(new ChessPosition(startingRow, 8), new ChessPosition(startingRow, 6), null));
+                castleStatus.rightRookMoved = true;
+            }
         }
-        if (canCastleTeams[getTeamTurn().ordinal()] &&
-                (piece.getPieceType() == ChessPiece.PieceType.KING || piece.getPieceType() == ChessPiece.PieceType.ROOK)) {
-            canCastleTeams[getTeamTurn().ordinal()] = false;
+
+        // Update castle status
+        if (piece.getPieceType() == ChessPiece.PieceType.ROOK) {
+            if (!castleStatus.leftRookMoved &&
+                    move.getStartPosition().equals(new ChessPosition(startingRow, 1))) {
+                castleStatus.leftRookMoved = true;
+            }else if(!castleStatus.rightRookMoved &&
+                    move.getStartPosition().equals(new ChessPosition(startingRow, 8))) {
+                castleStatus.rightRookMoved = true;
+            }
+        }
+        if (piece.getPieceType() == ChessPiece.PieceType.KING && !castleStatus.kingMoved) {
+            castleStatus.kingMoved = true;
         }
 
         board.movePiece(move);
