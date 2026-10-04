@@ -107,8 +107,9 @@ public class ChessGame {
         Collection<ChessMove> possibleMoves = piece.pieceMoves(getBoard(),startPosition);
 
         // Handle castling first left then right
-        if (piece.getPieceType() == ChessPiece.PieceType.KING && !isInCheck(getBoard(), color)) {
-            int startRow = getBoard().getStartingPiecesRow(color);
+        int startRow = getBoard().getStartingPiecesRow(color);
+        if (piece.getPieceType() == ChessPiece.PieceType.KING && !isInCheck(getBoard(), color) &&
+        startPosition.equals(new ChessPosition(startRow,5))) {
             if (canCastleTeams[color.ordinal()].canCastleLeft() &&
                     getBoard().getPiece(new ChessPosition(startRow,4)) == null &&
                     getBoard().getPiece(new ChessPosition(startRow,3)) == null &&
