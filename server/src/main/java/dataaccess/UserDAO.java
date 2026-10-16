@@ -1,5 +1,6 @@
 package dataaccess;
 
+import handler.UsernameAlreadyTakenException;
 import model.UserData;
 
 public interface UserDAO {

@@ -7,5 +7,5 @@ public interface AuthDAO {
 
     AuthData getSession(String authToken) throws InvalidAuthTokenException;
 
-    void deleteSession(AuthData authData);
+    void deleteSession(AuthData authData) throws InvalidAuthTokenException;
 }

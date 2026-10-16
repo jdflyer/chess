@@ -1,8 +1,6 @@
 package handler;
 
-import dataaccess.AuthDAO;
-import dataaccess.NoUserException;
-import dataaccess.UserDAO;
+import dataaccess.*;
 import model.AuthData;
 import model.UserData;
 
