@@ -1,15 +1,14 @@
 package service;
 
 import dataaccess.*;
-import handler.UsernameAlreadyTakenException;
-import model.AuthData;
 import model.GameData;
-import model.UserData;
 
 import java.util.Collection;
+import java.util.UUID;
 
 public class GameService {
     GameDAO gameDAO;
+
 
     public GameService() {
         this.gameDAO = new MemoryGameDAO();
@@ -26,5 +25,9 @@ public class GameService {
         }
 
         return new GameList(metadata);
+    }
+
+    public int createGame(String gameName) throws DataAccessException {
+        return gameDAO.createGame(gameName);
     }
 }

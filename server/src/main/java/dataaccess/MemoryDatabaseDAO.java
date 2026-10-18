@@ -6,5 +6,6 @@ public class MemoryDatabaseDAO implements DatabaseDAO {
         MemoryAuthDAO.authDataMap.clear();
         MemoryUserDAO.userDataMap.clear();
         MemoryGameDAO.gameDataMap.clear();
+        MemoryGameDAO.nextGameId = 1;
     }
 }

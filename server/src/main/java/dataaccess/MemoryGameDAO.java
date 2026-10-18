@@ -1,13 +1,14 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.GameData;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 
 public class MemoryGameDAO implements GameDAO {
     static public HashMap<Integer, GameData> gameDataMap = new HashMap<>();
+    static public int nextGameId = 1;
 
     private void verifyValidGame(int gameId) throws InvalidGameException {
         if (!gameDataMap.containsKey(gameId)) {
@@ -27,8 +28,11 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     @Override
-    public void createGame(GameData gameData) throws DataAccessException {
-        gameDataMap.put(gameData.gameID(),gameData);
+    public int createGame(String gameName) throws DataAccessException {
+        int gameId = nextGameId;
+        gameDataMap.put(gameId,new GameData(gameId,"","",gameName, new ChessGame()));
+        nextGameId++;
+        return gameId;
     }
 
     @Override
