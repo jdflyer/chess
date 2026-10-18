@@ -11,12 +11,12 @@ public class RegisterService {
     UserDAO userDao;
     AuthDAO authDao;
 
-    RegisterService() {
+    public RegisterService() {
         this.userDao = new MemoryUserDAO();
         this.authDao = new MemoryAuthDAO();
     }
 
-    RegisterResult register(String username, String password, String email) throws UsernameAlreadyTakenException, DataAccessException {
+    public RegisterResult register(String username, String password, String email) throws UsernameAlreadyTakenException, DataAccessException {
         if (userDao.userExists(username)) {
             throw new UsernameAlreadyTakenException("Username "+username+" is already taken!");
         }

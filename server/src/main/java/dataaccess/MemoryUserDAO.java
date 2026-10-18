@@ -6,7 +6,8 @@ import model.UserData;
 import java.util.HashMap;
 
 public class MemoryUserDAO implements UserDAO{
-    HashMap<String,UserData> userDataMap;
+    // This member is static, its lifetime isn't tied to the class
+    public static HashMap<String,UserData> userDataMap;
 
     @Override
     public UserData getUser(String username) throws NoUserException {

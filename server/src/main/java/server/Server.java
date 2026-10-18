@@ -1,6 +1,8 @@
 package server;
 
+import handler.RegisterHandler;
 import io.javalin.*;
+import io.javalin.router.Endpoint;
 
 public class Server {
 
@@ -9,8 +11,7 @@ public class Server {
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
-        // Register your endpoints and exception handlers here.
-
+        javalin.post("/user", context -> new RegisterHandler(context).handle());
     }
 
     public int run(int desiredPort) {
