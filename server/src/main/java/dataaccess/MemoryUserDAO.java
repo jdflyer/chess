@@ -18,6 +18,11 @@ public class MemoryUserDAO implements UserDAO{
     }
 
     @Override
+    public boolean userExists(String username) throws DataAccessException {
+        return userDataMap.containsKey(username);
+    }
+
+    @Override
     public void createUser(UserData userData) throws UsernameAlreadyTakenException {
         if (userDataMap.containsKey(userData.username())) {
             throw new UsernameAlreadyTakenException("The username "+userData.username()+" is already taken!");

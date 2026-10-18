@@ -8,9 +8,9 @@ import java.util.Collection;
 public interface GameDAO {
     GameData getGameById(String gameId) throws InvalidGameException;
 
-    Collection<GameData> getAllGames();
+    Collection<GameData> getAllGames() throws DataAccessException;
 
-    void createGame(GameData gameData);
+    void createGame(GameData gameData) throws DataAccessException;
 
     void updateGame(GameData data) throws InvalidGameException;
 }

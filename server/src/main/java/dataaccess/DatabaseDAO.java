@@ -1,5 +1,5 @@
 package dataaccess;
 
 public interface DatabaseDAO {
-    void clearDatabase();
+    void clearDatabase() throws DataAccessException;
 }
