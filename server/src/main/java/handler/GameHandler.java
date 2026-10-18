@@ -1,11 +1,14 @@
-package handler.gamehandler;
+package handler;
 
 import chess.ChessGame;
 import com.google.gson.JsonSyntaxException;
 import dataaccess.DataAccessException;
 import dataaccess.InvalidAuthTokenException;
 import dataaccess.InvalidGameException;
-import handler.Handler;
+import handler.gamehandler.GameCreateParams;
+import handler.gamehandler.GameCreateResponse;
+import handler.gamehandler.GameJoinParams;
+import handler.gamehandler.InvalidJoinParamsException;
 import io.javalin.http.Context;
 import service.gameservice.GameJoinTeamTakenException;
 import service.gameservice.GameService;
