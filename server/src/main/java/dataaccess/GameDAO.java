@@ -6,7 +6,7 @@ import model.GameData;
 import java.util.Collection;
 
 public interface GameDAO {
-    GameData getGameById(String gameId) throws InvalidGameException;
+    GameData getGameById(int gameId) throws InvalidGameException;
 
     Collection<GameData> getAllGames() throws DataAccessException;
 

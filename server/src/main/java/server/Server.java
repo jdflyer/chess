@@ -1,6 +1,7 @@
 package server;
 
 import handler.DatabaseHandler;
+import handler.GameHandler;
 import handler.SessionHandler;
 import handler.RegisterHandler;
 import io.javalin.*;
@@ -16,6 +17,7 @@ public class Server {
         javalin.post("/user", context -> new RegisterHandler(context).handleRegister());
         javalin.post("/session", context -> new SessionHandler(context).handleLogin());
         javalin.delete("/session", context -> new SessionHandler(context).handleLogout());
+        javalin.get("/game", context -> new GameHandler(context).handleListGames());
     }
 
     public int run(int desiredPort) {
