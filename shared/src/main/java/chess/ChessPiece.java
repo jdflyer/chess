@@ -85,20 +85,4 @@ public class ChessPiece {
         }
         return new ArrayList<>();
     }
-
-    public int getStartingRow() {
-        if (getTeamColor() == ChessGame.TeamColor.BLACK) {
-            return type == PieceType.PAWN ? ChessBoard.HEIGHT - 1 : ChessBoard.HEIGHT;
-        }else {
-            return type == PieceType.PAWN ? 2 : 1;
-        }
-    }
-
-    public int getPromotionRow() {
-        if (teamColor == ChessGame.TeamColor.BLACK) {
-            return 1;
-        }else {
-            return ChessBoard.HEIGHT;
-        }
-    }
 }

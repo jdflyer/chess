@@ -28,11 +28,7 @@ public class MemoryAuthDAO implements AuthDAO {
 
     @Override
     public Collection<AuthData> getAllSessions() {
-        ArrayList<AuthData> sessions = new ArrayList<>();
-        authDataMap.forEach((username, authData) -> {
-            sessions.add(authData);
-        });
-        return sessions;
+        return authDataMap.values();
     }
 
 

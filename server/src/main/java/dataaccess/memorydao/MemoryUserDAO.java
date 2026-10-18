@@ -25,11 +25,7 @@ public class MemoryUserDAO implements UserDAO {
 
     @Override
     public Collection<UserData> getAllUsers() {
-        ArrayList<UserData> users = new ArrayList<>();
-        userDataMap.forEach((username, userData) -> {
-            users.add(userData);
-        });
-        return users;
+        return userDataMap.values();
     }
 
     @Override

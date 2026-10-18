@@ -7,11 +7,6 @@ import java.util.Collection;
 
 public abstract class ClassicChessMoveValidator implements ChessMoveValidator {
     @Override
-    public boolean isValid(ChessPiece piece, ChessMove move, ChessBoard board) {
-        return getValidMoves(board, move.getStartPosition(), board.getPiece(move.getStartPosition())).contains(move);
-    }
-
-    @Override
     public abstract Collection<ChessMove> getValidMoves(ChessBoard board, ChessPosition position, ChessPiece piece);
 
     public enum TakeCondition {
@@ -30,14 +25,6 @@ public abstract class ClassicChessMoveValidator implements ChessMoveValidator {
             return TakeCondition.NO_PIECE;
         }
         return other.getTeamColor() == piece.getTeamColor() ? TakeCondition.SAME_TEAM : TakeCondition.OTHER_TEAM;
-    }
-
-    protected int getForwardDirection(ChessPiece piece) {
-        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-            return 1;
-        }else {
-            return -1;
-        }
     }
 
     protected void walkBoard(ChessBoard board, ChessPiece piece, ChessPosition startPosition,

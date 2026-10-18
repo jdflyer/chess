@@ -30,16 +30,6 @@ public class ChessBoard {
         return pos.getRow() > 0 && pos.getRow() <= HEIGHT && pos.getColumn() > 0 && pos.getColumn() <= WIDTH;
     }
 
-    /**
-     *
-     * @param position  the piece to check if we can take
-     * @param team      the team to check against
-     * @return true if the piece at the given position is on a different team than the supplied team
-     */
-    public boolean canTake(ChessPosition position, ChessGame.TeamColor team) {
-        return getPiece(position).getTeamColor() != team;
-    }
-
     public int getStartingPiecesRow(ChessGame.TeamColor team) {
         return team == ChessGame.TeamColor.BLACK ? HEIGHT : 1;
     }

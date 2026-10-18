@@ -34,7 +34,8 @@ public class GameService {
         return gameDAO.createGame(gameName);
     }
 
-    public void joinGame(int gameId, ChessGame.TeamColor color, String username) throws InvalidGameException, GameJoinTeamTakenException ,DataAccessException {
+    public void joinGame(int gameId, ChessGame.TeamColor color, String username) throws InvalidGameException,
+            GameJoinTeamTakenException ,DataAccessException {
         GameData currentGame = gameDAO.getGameById(gameId);
         String blackUsername = currentGame.blackUsername();
         String whiteUsername = currentGame.whiteUsername();
