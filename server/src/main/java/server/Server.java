@@ -1,6 +1,7 @@
 package server;
 
 import handler.DatabaseHandler;
+import handler.LoginHandler;
 import handler.RegisterHandler;
 import io.javalin.*;
 import io.javalin.router.Endpoint;
@@ -14,6 +15,7 @@ public class Server {
 
         javalin.delete("/db", context -> new DatabaseHandler(context).handle());
         javalin.post("/user", context -> new RegisterHandler(context).handle());
+        javalin.post("/session", context -> new LoginHandler(context).handle());
     }
 
     public int run(int desiredPort) {

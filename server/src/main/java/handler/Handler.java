@@ -65,5 +65,9 @@ public abstract class Handler {
         setResponseError(500,"internal server error");
     }
 
+    protected void setInternalServerError(Exception e) {
+        setResponseError(500,"internal server error ("+e.getMessage()+")");
+    }
+
     abstract void handle();
 }

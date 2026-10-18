@@ -11,21 +11,25 @@ public class RegisterService {
     UserDAO userDao;
     AuthDAO authDao;
 
+    public static String hashPassword(String originalPassword) {
+        // todo: Use an actual password hashing algorithm, this is just here to show the method
+        return Integer.toString(originalPassword.hashCode());
+    }
+
     public RegisterService() {
         this.userDao = new MemoryUserDAO();
         this.authDao = new MemoryAuthDAO();
     }
 
-    public RegisterResult register(String username, String password, String email) throws UsernameAlreadyTakenException, DataAccessException {
+    public LoginResult register(String username, String password, String email) throws UsernameAlreadyTakenException, DataAccessException {
         if (userDao.userExists(username)) {
             throw new UsernameAlreadyTakenException("Username "+username+" is already taken!");
         }
 
-        // Todo: Use a real password hash algorithm, not Java's hash
-        UserData data = new UserData(username, Integer.toString(password.hashCode()), email);
+        UserData data = new UserData(username, hashPassword(password), email);
         userDao.createUser(data);
-        String authToken = UUID.randomUUID().toString();
-        authDao.createSession(new AuthData(authToken,username));
-        return new RegisterResult(username,authToken);
+        AuthData authData = LoginService.createNewAuthData(username);
+        authDao.createSession(authData);
+        return new LoginResult(username,authData.authToken());
     }
 }
