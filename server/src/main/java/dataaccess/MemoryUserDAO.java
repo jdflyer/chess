@@ -3,6 +3,8 @@ package dataaccess;
 import handler.UsernameAlreadyTakenException;
 import model.UserData;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 public class MemoryUserDAO implements UserDAO{
@@ -16,6 +18,15 @@ public class MemoryUserDAO implements UserDAO{
             throw new NoUserException("There is no user with the username "+username);
         }
         return data;
+    }
+
+    @Override
+    public Collection<UserData> getAllUsers() {
+        ArrayList<UserData> users = new ArrayList<>();
+        userDataMap.forEach((username, userData) -> {
+            users.add(userData);
+        });
+        return users;
     }
 
     @Override

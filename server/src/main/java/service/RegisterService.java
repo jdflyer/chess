@@ -5,6 +5,7 @@ import handler.UsernameAlreadyTakenException;
 import model.AuthData;
 import model.UserData;
 
+import java.util.Collection;
 import java.util.UUID;
 
 public class RegisterService {
@@ -31,5 +32,9 @@ public class RegisterService {
         AuthData authData = LoginService.createNewAuthData(username);
         authDao.createSession(authData);
         return new LoginResult(username,authData.authToken());
+    }
+
+    public Collection<UserData> getAllUsers() throws DataAccessException {
+        return userDao.getAllUsers();
     }
 }

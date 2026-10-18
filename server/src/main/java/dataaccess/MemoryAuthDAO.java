@@ -1,7 +1,10 @@
 package dataaccess;
 
 import model.AuthData;
+import model.UserData;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 public class MemoryAuthDAO implements AuthDAO {
@@ -21,6 +24,16 @@ public class MemoryAuthDAO implements AuthDAO {
         }
         return data;
     }
+
+    @Override
+    public Collection<AuthData> getAllSessions() {
+        ArrayList<AuthData> sessions = new ArrayList<>();
+        authDataMap.forEach((username, authData) -> {
+            sessions.add(authData);
+        });
+        return sessions;
+    }
+
 
     @Override
     public void deleteSession(AuthData authData) throws InvalidAuthTokenException {
