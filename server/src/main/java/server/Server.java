@@ -19,6 +19,7 @@ public class Server {
         javalin.delete("/session", context -> new SessionHandler(context).handleLogout());
         javalin.get("/game", context -> new GameHandler(context).handleListGames());
         javalin.post("/game", context -> new GameHandler(context).handleCreateGame());
+        javalin.put("/game", context -> new GameHandler(context).handleJoinGame());
     }
 
     public int run(int desiredPort) {

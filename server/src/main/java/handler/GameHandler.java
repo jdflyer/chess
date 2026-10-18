@@ -1,10 +1,15 @@
 package handler;
 
+import chess.ChessGame;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
 import dataaccess.DataAccessException;
+import dataaccess.InvalidAuthTokenException;
+import dataaccess.InvalidGameException;
 import io.javalin.http.Context;
+import service.GameJoinTeamTakenException;
 import service.GameService;
+import service.SessionService;
 
 public class GameHandler extends Handler {
 
@@ -37,6 +42,38 @@ public class GameHandler extends Handler {
         }catch (JsonSyntaxException e) {
             setBadRequestError();
         }catch (DataAccessException e) {
+            setInternalServerError(e);
+        }
+    }
+
+    public void handleJoinGame() {
+        if (!isValidAuthToken()) {
+            setUnauthorizedError();
+            return;
+        }
+
+        try {
+            var requestData = getRequestData(GameJoinParams.class);
+
+            ChessGame.TeamColor color;
+            if (requestData.playerColor().equals("WHITE")){
+                color = ChessGame.TeamColor.WHITE;
+            }else if (requestData.playerColor().equals("BLACK")) {
+                color = ChessGame.TeamColor.BLACK;
+            }else {
+                throw new InvalidJoinParamsException("Unknown team");
+            }
+
+            String username = new SessionService().getAuthData(getAuthToken()).username();
+            new GameService().joinGame(requestData.gameID(),color,username);
+            setResponseJson("{}");
+        }catch (GameJoinTeamTakenException e) {
+            setResponseError(403,"already taken");
+        }catch (JsonSyntaxException | InvalidJoinParamsException | InvalidGameException e) {
+            setBadRequestError();
+        }catch (InvalidAuthTokenException e) {
+            setUnauthorizedError();
+        } catch (DataAccessException e) {
             setInternalServerError(e);
         }
     }

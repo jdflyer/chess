@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.*;
 import model.GameData;
 
@@ -29,5 +30,24 @@ public class GameService {
 
     public int createGame(String gameName) throws DataAccessException {
         return gameDAO.createGame(gameName);
+    }
+
+    public void joinGame(int gameId, ChessGame.TeamColor color, String username) throws InvalidGameException, GameJoinTeamTakenException ,DataAccessException {
+        GameData currentGame = gameDAO.getGameById(gameId);
+        String blackUsername = currentGame.blackUsername();
+        String whiteUsername = currentGame.whiteUsername();
+        if (color == ChessGame.TeamColor.BLACK) {
+            if (currentGame.blackUsername() != null) {
+                throw new GameJoinTeamTakenException("Attempted to join Black team when there is a player on it");
+            }
+            blackUsername = username;
+        }else if (color == ChessGame.TeamColor.WHITE) {
+            if (currentGame.whiteUsername() != null) {
+                throw new GameJoinTeamTakenException("Attempted to join White team when there is a player on it");
+            }
+            whiteUsername = username;
+        }
+
+        gameDAO.updateGame(new GameData(gameId, whiteUsername, blackUsername, currentGame.gameName(), currentGame.game()));
     }
 }

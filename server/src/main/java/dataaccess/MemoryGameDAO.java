@@ -30,7 +30,7 @@ public class MemoryGameDAO implements GameDAO {
     @Override
     public int createGame(String gameName) throws DataAccessException {
         int gameId = nextGameId;
-        gameDataMap.put(gameId,new GameData(gameId,"","",gameName, new ChessGame()));
+        gameDataMap.put(gameId,new GameData(gameId,null,null,gameName, new ChessGame()));
         nextGameId++;
         return gameId;
     }
