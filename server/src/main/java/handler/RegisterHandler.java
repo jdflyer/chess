@@ -17,9 +17,8 @@ public class RegisterHandler extends Handler {
     @Override
     public void handle() {
         try {
-            UserData registerData = new Gson().fromJson(ctx.body(), UserData.class);
-            RegisterResult result = new RegisterService().register(registerData.username(),registerData.password(),registerData.email());
-            setResponse(result);
+            var registerData = getRequestData(UserData.class);
+            setResponse(new RegisterService().register(registerData.username(),registerData.password(),registerData.email()));
         }catch (JsonSyntaxException e) {
             setBadRequestError();
         }catch (DataAccessException e) {

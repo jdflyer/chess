@@ -1,5 +1,6 @@
 package server;
 
+import handler.DatabaseHandler;
 import handler.RegisterHandler;
 import io.javalin.*;
 import io.javalin.router.Endpoint;
@@ -11,6 +12,7 @@ public class Server {
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
+        javalin.delete("/db", context -> new DatabaseHandler(context).handle());
         javalin.post("/user", context -> new RegisterHandler(context).handle());
     }
 

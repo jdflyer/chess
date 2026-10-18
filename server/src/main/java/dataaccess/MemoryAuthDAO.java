@@ -6,7 +6,7 @@ import java.util.HashMap;
 
 public class MemoryAuthDAO implements AuthDAO {
     // This member is static, its lifetime isn't tied to the class
-    public static HashMap<String, AuthData> authDataMap;
+    public static HashMap<String, AuthData> authDataMap = new HashMap<>();
 
     @Override
     public void createSession(AuthData authData) {

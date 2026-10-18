@@ -1,7 +1,12 @@
 package handler;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import io.javalin.http.Context;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.RecordComponent;
+import java.lang.reflect.Type;
 
 public abstract class Handler {
     Context ctx;
@@ -10,10 +15,26 @@ public abstract class Handler {
         this.ctx = ctx;
     }
 
-    protected void setResponseJson(int statusCode, String message) {
+    protected <T> T getRequestData(Class<T> classOfT) throws JsonSyntaxException {
+        T record = new Gson().fromJson(ctx.body(), classOfT);
+        if (classOfT.isRecord()) {
+            for (RecordComponent component : classOfT.getRecordComponents()) {
+                try {
+                    if (component.getAccessor().invoke(record) == null) {
+                        throw new JsonSyntaxException(component.getName()+" is expected but not included!");
+                    }
+                }catch (IllegalAccessException | InvocationTargetException e) {
+                    continue;
+                }
+            }
+        }
+        return record;
+    }
+
+    protected void setResponseJson(int statusCode, String json) {
         ctx.status(statusCode);
         ctx.contentType("application/json");
-        ctx.result("{ \"message\": \"Error: "+message+"\" }");
+        ctx.result(json);
     }
 
     protected void setResponseJson(String message) {

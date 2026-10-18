@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 public class MemoryUserDAO implements UserDAO{
     // This member is static, its lifetime isn't tied to the class
-    public static HashMap<String,UserData> userDataMap;
+    public static HashMap<String,UserData> userDataMap = new HashMap<>();
 
     @Override
     public UserData getUser(String username) throws NoUserException {
