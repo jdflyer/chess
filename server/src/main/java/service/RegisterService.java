@@ -1,6 +1,8 @@
 package service;
 
 import dataaccess.*;
+import dataaccess.memorydao.MemoryAuthDAO;
+import dataaccess.memorydao.MemoryUserDAO;
 import handler.UsernameAlreadyTakenException;
 import model.AuthData;
 import model.UserData;

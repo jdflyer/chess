@@ -1,7 +1,7 @@
 package server;
 
 import handler.DatabaseHandler;
-import handler.GameHandler;
+import handler.gamehandler.GameHandler;
 import handler.SessionHandler;
 import handler.RegisterHandler;
 import io.javalin.*;

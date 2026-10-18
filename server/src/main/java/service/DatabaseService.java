@@ -2,7 +2,7 @@ package service;
 
 import dataaccess.DataAccessException;
 import dataaccess.DatabaseDAO;
-import dataaccess.MemoryDatabaseDAO;
+import dataaccess.memorydao.MemoryDatabaseDAO;
 
 public class DatabaseService {
     DatabaseDAO databaseDAO;

@@ -1,16 +1,15 @@
-package service;
+package service.gameservice;
 
 import chess.ChessGame;
 import dataaccess.*;
+import dataaccess.memorydao.MemoryGameDAO;
 import model.GameData;
 import server.ServerConfig;
 
 import java.util.Collection;
-import java.util.UUID;
 
 public class GameService {
-    GameDAO gameDAO;
-
+    public GameDAO gameDAO;
 
     public GameService() {
         if (ServerConfig.databaseType == ServerConfig.DatabaseType.MEMORY) {

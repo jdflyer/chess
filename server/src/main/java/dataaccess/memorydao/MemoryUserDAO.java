@@ -1,5 +1,8 @@
-package dataaccess;
+package dataaccess.memorydao;
 
+import dataaccess.DataAccessException;
+import dataaccess.NoUserException;
+import dataaccess.UserDAO;
 import handler.UsernameAlreadyTakenException;
 import model.UserData;
 
@@ -7,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-public class MemoryUserDAO implements UserDAO{
+public class MemoryUserDAO implements UserDAO {
     // This member is static, its lifetime isn't tied to the class
     public static HashMap<String,UserData> userDataMap = new HashMap<>();
 

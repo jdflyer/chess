@@ -1,4 +1,4 @@
-package handler;
+package handler.gamehandler;
 
 public record GameCreateResponse(int gameID) {
 }

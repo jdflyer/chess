@@ -1,4 +1,4 @@
-package service;
+package service.gameservice;
 
 public class GameJoinTeamTakenException extends RuntimeException {
     public GameJoinTeamTakenException(String message) {

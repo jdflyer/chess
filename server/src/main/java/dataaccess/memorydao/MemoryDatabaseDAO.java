@@ -1,4 +1,7 @@
-package dataaccess;
+package dataaccess.memorydao;
+
+import dataaccess.DataAccessException;
+import dataaccess.DatabaseDAO;
 
 public class MemoryDatabaseDAO implements DatabaseDAO {
     public void clearDatabase() throws DataAccessException {

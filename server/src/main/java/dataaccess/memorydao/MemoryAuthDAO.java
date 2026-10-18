@@ -1,7 +1,8 @@
-package dataaccess;
+package dataaccess.memorydao;
 
+import dataaccess.AuthDAO;
+import dataaccess.InvalidAuthTokenException;
 import model.AuthData;
-import model.UserData;
 
 import java.util.ArrayList;
 import java.util.Collection;
