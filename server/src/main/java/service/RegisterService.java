@@ -4,6 +4,7 @@ import dataaccess.*;
 import handler.UsernameAlreadyTakenException;
 import model.AuthData;
 import model.UserData;
+import server.ServerConfig;
 
 import java.util.Collection;
 
@@ -17,8 +18,10 @@ public class RegisterService {
     }
 
     public RegisterService() {
-        this.userDao = new MemoryUserDAO();
-        this.authDao = new MemoryAuthDAO();
+        if (ServerConfig.databaseType == ServerConfig.DatabaseType.MEMORY) {
+            this.userDao = new MemoryUserDAO();
+            this.authDao = new MemoryAuthDAO();
+        }
     }
 
     public LoginResult register(String username, String password, String email) throws UsernameAlreadyTakenException, DataAccessException {

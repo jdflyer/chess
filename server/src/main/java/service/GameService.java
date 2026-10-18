@@ -3,6 +3,7 @@ package service;
 import chess.ChessGame;
 import dataaccess.*;
 import model.GameData;
+import server.ServerConfig;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -12,7 +13,9 @@ public class GameService {
 
 
     public GameService() {
-        this.gameDAO = new MemoryGameDAO();
+        if (ServerConfig.databaseType == ServerConfig.DatabaseType.MEMORY) {
+            this.gameDAO = new MemoryGameDAO();
+        }
     }
 
     public GameList listAllGames() throws DataAccessException {

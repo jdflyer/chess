@@ -21,6 +21,7 @@ public class SessionServiceTests {
         try {
             LoginResult data = new RegisterService().register("myUser","password","email@example.com");
             LoginResult loginData = new SessionService().login("myUser","password");
+            Assertions.assertTrue(new SessionService().isValidAuth(loginData.authToken()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

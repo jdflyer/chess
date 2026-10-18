@@ -3,6 +3,7 @@ package service;
 import dataaccess.*;
 import model.AuthData;
 import model.UserData;
+import server.ServerConfig;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -16,8 +17,10 @@ public class SessionService {
     }
 
     public SessionService() {
-        this.userDao = new MemoryUserDAO();
-        this.authDao = new MemoryAuthDAO();
+        if (ServerConfig.databaseType == ServerConfig.DatabaseType.MEMORY) {
+            this.userDao = new MemoryUserDAO();
+            this.authDao = new MemoryAuthDAO();
+        }
     }
 
     public AuthData getAuthData(String authToken) throws InvalidAuthTokenException {
