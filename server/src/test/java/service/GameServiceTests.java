@@ -25,5 +25,19 @@ public class GameServiceTests {
         }
     }
 
+    @Test
+    public void createGame() {
+        try {
+            int id = new GameService().createGame("my game name");
+            Assertions.assertEquals(1,new GameService().listAllGames().games().length);
+            Assertions.assertEquals(id,new GameService().gameDAO.getGameById(id).gameID());
+
+            // Same name is valid
+            int id2 = new GameService().createGame("my game name");
+            Assertions.assertEquals(2,new GameService().listAllGames().games().length);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }
