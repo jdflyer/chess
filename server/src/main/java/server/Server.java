@@ -1,10 +1,9 @@
 package server;
 
 import handler.DatabaseHandler;
-import handler.LoginHandler;
+import handler.SessionHandler;
 import handler.RegisterHandler;
 import io.javalin.*;
-import io.javalin.router.Endpoint;
 
 public class Server {
 
@@ -13,9 +12,10 @@ public class Server {
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
-        javalin.delete("/db", context -> new DatabaseHandler(context).handle());
-        javalin.post("/user", context -> new RegisterHandler(context).handle());
-        javalin.post("/session", context -> new LoginHandler(context).handle());
+        javalin.delete("/db", context -> new DatabaseHandler(context).handleClear());
+        javalin.post("/user", context -> new RegisterHandler(context).handleRegister());
+        javalin.post("/session", context -> new SessionHandler(context).handleLogin());
+        javalin.delete("/session", context -> new SessionHandler(context).handleLogout());
     }
 
     public int run(int desiredPort) {

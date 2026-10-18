@@ -1,8 +1,6 @@
 package service;
 
 import dataaccess.DataAccessException;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryUserDAO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +22,7 @@ public class DatabaseServiceTests {
             new RegisterService().register("myUser","password","email@example.com");
             new DatabaseService().clearDatabase();
             Assertions.assertEquals(0, new RegisterService().getAllUsers().size());
-            Assertions.assertEquals(0, new LoginService().getAllSessions().size());
+            Assertions.assertEquals(0, new SessionService().getAllSessions().size());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

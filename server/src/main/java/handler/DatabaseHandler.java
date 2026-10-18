@@ -10,7 +10,7 @@ public class DatabaseHandler extends Handler {
         super(ctx);
     }
 
-    protected void handleClear() {
+    public void handleClear() {
         try {
             DatabaseService service = new DatabaseService();
             service.clearDatabase();
@@ -18,10 +18,5 @@ public class DatabaseHandler extends Handler {
         }catch (DataAccessException e) {
             setInternalServerError();
         }
-    }
-
-    @Override
-    public void handle() {
-       handleClear();
     }
 }

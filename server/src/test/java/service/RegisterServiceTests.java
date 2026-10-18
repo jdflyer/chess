@@ -1,15 +1,12 @@
 package service;
 
 import dataaccess.DataAccessException;
-import dataaccess.MemoryAuthDAO;
-import dataaccess.MemoryUserDAO;
 import handler.UsernameAlreadyTakenException;
 import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import passoff.model.TestAuthResult;
 
 public class RegisterServiceTests {
     @BeforeEach
@@ -27,10 +24,10 @@ public class RegisterServiceTests {
             LoginResult data = new RegisterService().register("myUser","password","email@example.com");
             Assertions.assertEquals("myUser",data.username());
             Assertions.assertEquals(1, new RegisterService().getAllUsers().size());
-            Assertions.assertEquals(1, new LoginService().getAllSessions().size());
+            Assertions.assertEquals(1, new SessionService().getAllSessions().size());
             Assertions.assertEquals(new UserData("myUser",RegisterService.hashPassword("password"),"email@example.com"),
                     new RegisterService().userDao.getUser("myUser"));
-            Assertions.assertEquals(new AuthData(data.authToken(),"myUser"),new LoginService().authDao.getSession(data.authToken()));
+            Assertions.assertEquals(new AuthData(data.authToken(),"myUser"),new SessionService().authDao.getSession(data.authToken()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

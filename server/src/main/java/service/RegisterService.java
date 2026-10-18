@@ -6,7 +6,6 @@ import model.AuthData;
 import model.UserData;
 
 import java.util.Collection;
-import java.util.UUID;
 
 public class RegisterService {
     UserDAO userDao;
@@ -29,7 +28,7 @@ public class RegisterService {
 
         UserData data = new UserData(username, hashPassword(password), email);
         userDao.createUser(data);
-        AuthData authData = LoginService.createNewAuthData(username);
+        AuthData authData = SessionService.createNewAuthData(username);
         authDao.createSession(authData);
         return new LoginResult(username,authData.authToken());
     }

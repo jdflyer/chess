@@ -2,11 +2,12 @@ package handler;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import dataaccess.InvalidAuthTokenException;
 import io.javalin.http.Context;
+import service.SessionService;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.RecordComponent;
-import java.lang.reflect.Type;
 
 public abstract class Handler {
     Context ctx;
@@ -69,5 +70,15 @@ public abstract class Handler {
         setResponseError(500,"internal server error ("+e.getMessage()+")");
     }
 
-    abstract void handle();
+    protected String getAuthToken() throws InvalidAuthHeaderException {
+        return ctx.header("authorization");
+    }
+
+    protected boolean isValidAuthToken() {
+        try {
+            return new SessionService().isValidAuth(getAuthToken());
+        } catch (InvalidAuthHeaderException e) {
+            return false;
+        }
+    }
 }

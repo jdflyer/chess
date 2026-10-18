@@ -12,8 +12,7 @@ public class RegisterHandler extends Handler {
         super(ctx);
     }
 
-    @Override
-    public void handle() {
+    public void handleRegister() {
         try {
             var registerData = getRequestData(UserData.class);
             setResponse(new RegisterService().register(registerData.username(),registerData.password(),registerData.email()));
