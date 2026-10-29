@@ -3,6 +3,8 @@ package service;
 import dataaccess.*;
 import dataaccess.memorydao.MemoryAuthDAO;
 import dataaccess.memorydao.MemoryUserDAO;
+import dataaccess.sqldao.SQLAuthDAO;
+import dataaccess.sqldao.SQLUserDAO;
 import model.AuthData;
 import model.UserData;
 import server.ServerConfig;
@@ -22,6 +24,9 @@ public class SessionService {
         if (ServerConfig.databaseType == ServerConfig.DatabaseType.MEMORY) {
             this.userDao = new MemoryUserDAO();
             this.authDao = new MemoryAuthDAO();
+        }else if (ServerConfig.databaseType == ServerConfig.DatabaseType.SQL) {
+            this.userDao = new SQLUserDAO();
+            this.authDao = new SQLAuthDAO();
         }
     }
 

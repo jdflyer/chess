@@ -2,6 +2,7 @@ package handler;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import dataaccess.DataAccessException;
 import dataaccess.InvalidAuthTokenException;
 import io.javalin.http.Context;
 import service.SessionService;
@@ -77,7 +78,7 @@ public abstract class Handler {
     protected boolean isValidAuthToken() {
         try {
             return new SessionService().isValidAuth(getAuthToken());
-        } catch (InvalidAuthHeaderException e) {
+        } catch (InvalidAuthHeaderException|DataAccessException e) {
             return false;
         }
     }

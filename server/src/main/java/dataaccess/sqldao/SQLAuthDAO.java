@@ -27,13 +27,13 @@ public class SQLAuthDAO implements AuthDAO {
     @Override
     public AuthData getSession(String authToken) throws InvalidAuthTokenException,DataAccessException {
         try {
-            var statement = DatabaseManager.getConnection().prepareStatement("SELECT * FROM users where auth_token=?");
+            var statement = DatabaseManager.getConnection().prepareStatement("SELECT * FROM sessions where auth_token=?");
             statement.setString(1, authToken);
             var rs = statement.executeQuery();
             if (!rs.next()) {
                 throw new InvalidAuthTokenException("The auth token "+authToken+" does not exist!");
             }
-            return new AuthData(rs.getString("username"),rs.getString("auth_token"));
+            return new AuthData(rs.getString("auth_token"),rs.getString("username"));
         }catch (SQLException e) {
             throw new DataAccessException("Error Accessing Database");
         }
@@ -45,7 +45,7 @@ public class SQLAuthDAO implements AuthDAO {
             ArrayList<AuthData> sessions = new ArrayList<>();
             var rs = DatabaseManager.getConnection().prepareStatement("SELECT * FROM sessions;").executeQuery();
             while (rs.next()) {
-                sessions.add(new AuthData(rs.getString("username"),rs.getString("auth_token")));
+                sessions.add(new AuthData(rs.getString("auth_token"),rs.getString("username")));
             }
             return sessions;
         }catch (SQLException e) {
