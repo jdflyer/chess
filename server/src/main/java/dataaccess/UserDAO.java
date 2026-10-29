@@ -7,7 +7,7 @@ import java.util.Collection;
 
 public interface UserDAO {
     // Gets a user by username
-    UserData getUser(String username) throws NoUserException;
+    UserData getUser(String username) throws NoUserException,DataAccessException;
 
     Collection<UserData> getAllUsers() throws DataAccessException;
 
@@ -15,5 +15,5 @@ public interface UserDAO {
     boolean userExists(String username) throws DataAccessException;
 
     // Creates a user by the given user definition
-    void createUser(UserData userData) throws UsernameAlreadyTakenException;
+    void createUser(UserData userData) throws UsernameAlreadyTakenException,DataAccessException;
 }
