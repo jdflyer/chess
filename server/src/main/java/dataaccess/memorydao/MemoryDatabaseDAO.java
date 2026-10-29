@@ -4,6 +4,10 @@ import dataaccess.DataAccessException;
 import dataaccess.DatabaseDAO;
 
 public class MemoryDatabaseDAO implements DatabaseDAO {
+    public void configureDatabase() throws DataAccessException {
+        return;
+    }
+
     public void clearDatabase() throws DataAccessException {
         // Clear all of our static maps, acts as if we were clearing tables
         MemoryAuthDAO.authDataMap.clear();

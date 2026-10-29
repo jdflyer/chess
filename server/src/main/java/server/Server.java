@@ -2,6 +2,7 @@ package server;
 
 import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
+import dataaccess.sqldao.SQLDatabaseDAO;
 import handler.DatabaseHandler;
 import handler.GameHandler;
 import handler.SessionHandler;
@@ -15,8 +16,8 @@ public class Server {
     public Server() {
         if (ServerConfig.databaseType == ServerConfig.DatabaseType.SQL) {
             try{
-                // Call the function every time, it will only create a database if it doesn't exist
-                DatabaseManager.createDatabase();
+                // Make sure our schema is up to date:
+                new SQLDatabaseDAO().configureDatabase();
             } catch(DataAccessException e) {
                 throw new RuntimeException("Could not create a database! Is mysql running and connected?");
             }

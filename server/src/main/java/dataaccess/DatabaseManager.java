@@ -39,6 +39,36 @@ public class DatabaseManager {
         }
     }
 
+    static public void createTables() throws DataAccessException {
+        try {
+            DatabaseManager.getConnection().prepareStatement("""
+                    CREATE TABLE IF NOT EXISTS users (
+                    id INT NOT NULL AUTO_INCREMENT,
+                    username VARCHAR(255) not NULL,
+                    password_hash VARCHAR(255) not NULL,
+                    email VARCHAR(255) not NULL,
+                    PRIMARY KEY (id)
+                    );""").executeUpdate();
+            DatabaseManager.getConnection().prepareStatement("""
+                    CREATE TABLE IF NOT EXISTS sessions (
+                    id INT NOT NULL AUTO_INCREMENT,
+                    username VARCHAR(255) not NULL,
+                    auth_token VARCHAR(255) not NULL,
+                    PRIMARY KEY (id)
+                    );""").executeUpdate();
+            DatabaseManager.getConnection().prepareStatement("""
+                    CREATE TABLE IF NOT EXISTS games (
+                    id INT NOT NULL AUTO_INCREMENT,
+                    white_username VARCHAR(255) not NULL,
+                    black_username VARCHAR(255) not NULL,
+                    game_name VARCHAR(255) not NULL,
+                    PRIMARY KEY (id)
+                    );""").executeUpdate();
+        }catch (SQLException e) {
+            throw new DataAccessException("An SQL Error Occurred While Configuring the Database");
+        }
+    }
+
     /**
      * Create a connection to the database and sets the catalog based upon the
      * properties specified in db.properties. Connections to the database should

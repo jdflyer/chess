@@ -22,15 +22,14 @@ public class SQLDatabaseDAOTests {
     @Test
     public void databaseClearSuccessful() {
         try {
-            // Creates a table, checks if it exists
-            DatabaseManager.getConnection().prepareStatement("CREATE TABLE test( id INT );").executeUpdate();
-            DatabaseManager.getConnection().prepareStatement("INSERT INTO test VALUES (1);").executeUpdate();
+            // Tables exist already, add an entry and check if it clears
+            DatabaseManager.getConnection().prepareStatement("""
+                    INSERT INTO users (username,password_hash,email) VALUES ('username','password','email@example.com');
+                    """).executeUpdate();
             new SQLDatabaseDAO().clearDatabase();
-            try {
-                var result = DatabaseManager.getConnection().prepareStatement("SELECT ID FROM test").executeQuery();
-                throw new Exception("Should've errored here: the table doesn't exist");
-            } catch (SQLException e) {
-                return;
+            var result = DatabaseManager.getConnection().prepareStatement("SELECT COUNT(*) FROM users").executeQuery();
+            if (result.next()) {
+                Assertions.assertEquals(0,result.getInt(1));
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
