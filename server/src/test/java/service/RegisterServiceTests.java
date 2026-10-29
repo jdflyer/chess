@@ -26,8 +26,10 @@ public class RegisterServiceTests {
             Assertions.assertEquals(1, new RegisterService().getAllUsers().size());
             Assertions.assertEquals(1, new SessionService().getAllSessions().size());
             // We can't currently check equal passwords because of hashing salt
-//            Assertions.assertEquals(new UserData("myUser",RegisterService.hashPassword("password"),"email@example.com"),
-//                    new RegisterService().userDao.getUser("myUser"));
+            Assertions.assertEquals("myUser",
+                    new RegisterService().userDao.getUser("myUser").username());
+            Assertions.assertEquals("email@example.com",
+                    new RegisterService().userDao.getUser("myUser").email());
             Assertions.assertEquals(new AuthData(data.authToken(),"myUser"),new SessionService().authDao.getSession(data.authToken()));
         } catch (Exception e) {
             throw new RuntimeException(e);
