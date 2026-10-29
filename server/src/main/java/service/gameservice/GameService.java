@@ -13,11 +13,7 @@ public class GameService {
     public GameDAO gameDAO;
 
     public GameService() {
-        if (ServerConfig.databaseType == ServerConfig.DatabaseType.MEMORY) {
-            this.gameDAO = new MemoryGameDAO();
-        }else if (ServerConfig.databaseType == ServerConfig.DatabaseType.SQL) {
-            this.gameDAO = new SQLGameDAO();
-        }
+        gameDAO = ServerConfig.getGameDao();
     }
 
     public GameList listAllGames() throws DataAccessException {

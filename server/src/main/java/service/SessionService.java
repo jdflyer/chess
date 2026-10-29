@@ -21,13 +21,8 @@ public class SessionService {
     }
 
     public SessionService() {
-        if (ServerConfig.databaseType == ServerConfig.DatabaseType.MEMORY) {
-            this.userDao = new MemoryUserDAO();
-            this.authDao = new MemoryAuthDAO();
-        }else if (ServerConfig.databaseType == ServerConfig.DatabaseType.SQL) {
-            this.userDao = new SQLUserDAO();
-            this.authDao = new SQLAuthDAO();
-        }
+        userDao = ServerConfig.getUserDao();
+        authDao = ServerConfig.getAuthDao();
     }
 
     public AuthData getAuthData(String authToken) throws InvalidAuthTokenException,DataAccessException {

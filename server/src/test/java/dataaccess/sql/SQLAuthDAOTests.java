@@ -57,4 +57,21 @@ public class SQLAuthDAOTests {
             throw new RuntimeException(e);
         }
     }
+
+    @Test
+    public void deleteSessionInvalidAuth() {
+        try {
+            var dao = new SQLAuthDAO();
+            dao.createSession(new AuthData("my_auth_token","user"));
+            Assertions.assertEquals(1,dao.getAllSessions().size());
+            try {
+                dao.deleteSession(new AuthData("my_auth_token_invalid","user"));
+                throw new RuntimeException("Should've hit an InvalidAuthTokenException here");
+            }catch (InvalidAuthTokenException e) {
+                return;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

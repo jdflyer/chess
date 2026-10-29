@@ -2,9 +2,11 @@ package dataaccess.sql;
 
 import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
+import dataaccess.NoUserException;
 import dataaccess.UserDAO;
 import dataaccess.sqldao.SQLDatabaseDAO;
 import dataaccess.sqldao.SQLUserDAO;
+import handler.UsernameAlreadyTakenException;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +47,25 @@ public class SQLUserDAOTests {
             dao.createUser(new UserData("user","password","example@example.com"));
             Assertions.assertEquals(1,dao.getAllUsers().size());
             Assertions.assertTrue(dao.userExists("user"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void userAlreadyExists() {
+        try {
+            var dao = new SQLUserDAO();
+            dao.createUser(new UserData("user","password","example@example.com"));
+            Assertions.assertEquals(1,dao.getAllUsers().size());
+            Assertions.assertTrue(dao.userExists("user"));
+            try {
+                dao.createUser(new UserData("user","password2","example2@example.com"));
+                throw new RuntimeException("Should've thrown UsernameAlreadyTakenException here");
+            } catch (UsernameAlreadyTakenException e) {
+                return;
+            }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -1,9 +1,7 @@
 package dataaccess.sql;
 
-import dataaccess.DataAccessException;
-import dataaccess.DatabaseManager;
-import dataaccess.InvalidAuthTokenException;
-import dataaccess.UserDAO;
+import chess.ChessGame;
+import dataaccess.*;
 import dataaccess.sqldao.SQLAuthDAO;
 import dataaccess.sqldao.SQLDatabaseDAO;
 import dataaccess.sqldao.SQLGameDAO;
@@ -55,6 +53,26 @@ public class SQLGameDAOTests {
             Assertions.assertEquals("my_game",game.gameName());
             Assertions.assertEquals("my_username",game.whiteUsername());
             Assertions.assertEquals("username2",game.blackUsername());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void invalidIDs() {
+        try {
+            var dao = new SQLGameDAO();
+            try {
+                dao.getGameById(1);
+                throw new RuntimeException("Should've thrown InvalidGameException here!");
+            }catch (InvalidGameException _) {
+            }
+            try {
+                dao.updateGame(new GameData(1,"white","black","name",new ChessGame()));
+                throw new RuntimeException("Should've thrown InvalidGameException here!");
+            }catch (InvalidGameException e) {
+                return;
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
