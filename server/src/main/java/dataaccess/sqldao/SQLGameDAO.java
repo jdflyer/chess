@@ -1,6 +1,8 @@
 package dataaccess.sqldao;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
+import com.google.gson.JsonSerializer;
 import dataaccess.*;
 import model.GameData;
 import model.UserData;
@@ -18,6 +20,12 @@ public class SQLGameDAO implements GameDAO {
     private String getUsernameData(String username) {
         return username == null ? "" : username;
     }
+    private String serializeGameData(ChessGame game) {
+        return new Gson().toJson(game);
+    }
+    private ChessGame deserializeGameData(String gameData) {
+        return new Gson().fromJson(gameData,ChessGame.class);
+    }
 
     @Override
     public GameData getGameById(int gameId) throws InvalidGameException,DataAccessException {
@@ -29,7 +37,8 @@ public class SQLGameDAO implements GameDAO {
                 throw new InvalidGameException("There is no game with the id "+gameId);
             }
             return new GameData(gameId,getUsernameString(rs.getString("white_username")),
-                    getUsernameString(rs.getString("black_username")),rs.getString("game_name"),new ChessGame());
+                    getUsernameString(rs.getString("black_username")),rs.getString("game_name"),
+                    deserializeGameData(rs.getString("game_data")));
         }catch (SQLException e) {
             throw new DataAccessException("Error Accessing Database");
         }
@@ -42,7 +51,8 @@ public class SQLGameDAO implements GameDAO {
             var rs = DatabaseManager.getConnection().prepareStatement("SELECT * FROM games;").executeQuery();
             while (rs.next()) {
                 games.add(new GameData(rs.getInt("id"),getUsernameString(rs.getString("white_username")),
-                        getUsernameString(rs.getString("black_username")),rs.getString("game_name"),new ChessGame()));
+                        getUsernameString(rs.getString("black_username")),rs.getString("game_name"),
+                        deserializeGameData(rs.getString("game_data"))));
             }
             return games;
         }catch (SQLException e) {
@@ -54,11 +64,12 @@ public class SQLGameDAO implements GameDAO {
     public int createGame(String gameName) throws DataAccessException {
         try {
             var statement = DatabaseManager.getConnection().prepareStatement("""
-                    INSERT INTO games (white_username,black_username,game_name) VALUES (?,?,?);
+                    INSERT INTO games (white_username,black_username,game_name,game_data) VALUES (?,?,?,?);
                     """,Statement.RETURN_GENERATED_KEYS);
             statement.setString(1,"");
             statement.setString(2,"");
             statement.setString(3,gameName);
+            statement.setString(4,serializeGameData(new ChessGame()));
             var rows_affected = statement.executeUpdate();
             if (rows_affected > 0) {
                 var keys = statement.getGeneratedKeys();
@@ -81,13 +92,15 @@ public class SQLGameDAO implements GameDAO {
                     UPDATE games
                     SET white_username=?,
                         black_username=?,
-                        game_name=?
+                        game_name=?,
+                        game_data=?
                     WHERE id=?;
                     """);
             statement.setString(1,getUsernameData(data.whiteUsername()));
             statement.setString(2,getUsernameData(data.blackUsername()));
             statement.setString(3,data.gameName());
-            statement.setInt(4,data.gameID());
+            statement.setString(4,serializeGameData(data.game()));
+            statement.setInt(5,data.gameID());
             statement.executeUpdate();
         }catch (SQLException e) {
             throw new DataAccessException("Error Accessing Database");

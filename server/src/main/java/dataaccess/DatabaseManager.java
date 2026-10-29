@@ -62,6 +62,7 @@ public class DatabaseManager {
                     white_username VARCHAR(255) not NULL,
                     black_username VARCHAR(255) not NULL,
                     game_name VARCHAR(255) not NULL,
+                    game_data TEXT not NULL,
                     PRIMARY KEY (id)
                     );""").executeUpdate();
         }catch (SQLException e) {
