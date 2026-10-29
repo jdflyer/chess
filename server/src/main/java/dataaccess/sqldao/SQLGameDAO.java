@@ -6,6 +6,7 @@ import model.GameData;
 import model.UserData;
 
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,7 +55,7 @@ public class SQLGameDAO implements GameDAO {
         try {
             var statement = DatabaseManager.getConnection().prepareStatement("""
                     INSERT INTO games (white_username,black_username,game_name) VALUES (?,?,?);
-                    """);
+                    """,Statement.RETURN_GENERATED_KEYS);
             statement.setString(1,"");
             statement.setString(2,"");
             statement.setString(3,gameName);
@@ -62,7 +63,7 @@ public class SQLGameDAO implements GameDAO {
             if (rows_affected > 0) {
                 var keys = statement.getGeneratedKeys();
                 if (keys.next()) {
-                    return keys.getInt("id");
+                    return keys.getInt(1);
                 }
             }
             return -1;
@@ -86,6 +87,7 @@ public class SQLGameDAO implements GameDAO {
             statement.setString(1,getUsernameData(data.whiteUsername()));
             statement.setString(2,getUsernameData(data.blackUsername()));
             statement.setString(3,data.gameName());
+            statement.setInt(4,data.gameID());
             statement.executeUpdate();
         }catch (SQLException e) {
             throw new DataAccessException("Error Accessing Database");
