@@ -9,14 +9,17 @@ import service.InvalidPasswordException;
 import service.SessionService;
 
 public class SessionHandler extends Handler {
+    SessionService sessionService;
+
     public SessionHandler(Context ctx) {
         super(ctx);
+        sessionService = new SessionService();
     }
 
     public void handleLogin() {
         try {
             var loginData = getRequestData(LoginData.class);
-            setResponse(new SessionService().login(loginData.username(),loginData.password()));
+            setResponse(sessionService.login(loginData.username(),loginData.password()));
         }catch (JsonSyntaxException e) {
             setBadRequestError();
         }catch (NoUserException | InvalidPasswordException e) {
@@ -29,7 +32,7 @@ public class SessionHandler extends Handler {
     public void handleLogout() {
 
         try {
-            new SessionService().logout(getAuthToken());
+            sessionService.logout(getAuthToken());
             setResponseJson("{}");
         }catch (JsonSyntaxException | InvalidAuthHeaderException e) {
             setBadRequestError();

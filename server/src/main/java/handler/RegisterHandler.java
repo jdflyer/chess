@@ -7,15 +7,17 @@ import model.UserData;
 import service.RegisterService;
 
 public class RegisterHandler extends Handler {
+    RegisterService registerService;
 
     public RegisterHandler(Context ctx) {
         super(ctx);
+        registerService = new RegisterService();
     }
 
     public void handleRegister() {
         try {
             var registerData = getRequestData(UserData.class);
-            setResponse(new RegisterService().register(registerData.username(),registerData.password(),registerData.email()));
+            setResponse(registerService.register(registerData.username(),registerData.password(),registerData.email()));
         }catch (JsonSyntaxException e) {
             setBadRequestError();
         }catch (DataAccessException e) {

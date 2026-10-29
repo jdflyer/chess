@@ -15,9 +15,13 @@ import service.gameservice.GameService;
 import service.SessionService;
 
 public class GameHandler extends Handler {
+    GameService gameService;
+    SessionService sessionService;
 
     public GameHandler(Context ctx) {
         super(ctx);
+        gameService = new GameService();
+        sessionService = new SessionService();
     }
 
     public void handleListGames() {
@@ -27,7 +31,7 @@ public class GameHandler extends Handler {
         }
 
         try {
-            setResponse(new GameService().listAllGames());
+            setResponse(gameService.listAllGames());
         }catch (DataAccessException e) {
             setInternalServerError(e);
         }
@@ -40,7 +44,7 @@ public class GameHandler extends Handler {
         }
 
         try {
-            int gameId = new GameService().createGame(getRequestData(GameCreateParams.class).gameName());
+            int gameId = gameService.createGame(getRequestData(GameCreateParams.class).gameName());
             setResponse(new GameCreateResponse(gameId));
         }catch (JsonSyntaxException e) {
             setBadRequestError();
@@ -67,8 +71,8 @@ public class GameHandler extends Handler {
                 throw new InvalidJoinParamsException("Unknown team");
             }
 
-            String username = new SessionService().getAuthData(getAuthToken()).username();
-            new GameService().joinGame(requestData.gameID(),color,username);
+            String username = sessionService.getAuthData(getAuthToken()).username();
+            gameService.joinGame(requestData.gameID(),color,username);
             setResponseJson("{}");
         }catch (GameJoinTeamTakenException e) {
             setResponseError(403,"already taken");
