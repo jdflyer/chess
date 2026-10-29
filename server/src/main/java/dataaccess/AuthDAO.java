@@ -7,8 +7,8 @@ import java.util.Collection;
 public interface AuthDAO {
     void createSession(AuthData authData) throws DataAccessException;
 
-    AuthData getSession(String authToken) throws InvalidAuthTokenException;
+    AuthData getSession(String authToken) throws InvalidAuthTokenException,DataAccessException;
     Collection<AuthData> getAllSessions() throws DataAccessException;
 
-    void deleteSession(AuthData authData) throws InvalidAuthTokenException;
+    void deleteSession(AuthData authData) throws InvalidAuthTokenException,DataAccessException;
 }

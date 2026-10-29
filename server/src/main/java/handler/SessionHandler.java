@@ -36,8 +36,10 @@ public class SessionHandler extends Handler {
             setResponseJson("{}");
         }catch (JsonSyntaxException | InvalidAuthHeaderException e) {
             setBadRequestError();
-        } catch (InvalidAuthTokenException e) {
+        }catch (InvalidAuthTokenException e) {
             setUnauthorizedError();
+        }catch (DataAccessException e) {
+            setInternalServerError(e);
         }
     }
 }

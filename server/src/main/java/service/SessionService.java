@@ -25,11 +25,11 @@ public class SessionService {
         }
     }
 
-    public AuthData getAuthData(String authToken) throws InvalidAuthTokenException {
+    public AuthData getAuthData(String authToken) throws InvalidAuthTokenException,DataAccessException {
         return authDao.getSession(authToken);
     }
 
-    public boolean isValidAuth(String authToken) {
+    public boolean isValidAuth(String authToken) throws DataAccessException {
         try {
             AuthData data = getAuthData(authToken);
             return data.authToken().equals(authToken);
@@ -52,7 +52,7 @@ public class SessionService {
         return authDao.getAllSessions();
     }
 
-    public void logout(String authToken) throws InvalidAuthTokenException {
+    public void logout(String authToken) throws InvalidAuthTokenException,DataAccessException {
         AuthData data = authDao.getSession(authToken);
         authDao.deleteSession(data);
     }
