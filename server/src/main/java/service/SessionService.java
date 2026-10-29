@@ -40,7 +40,7 @@ public class SessionService {
 
     public LoginResult login(String username, String password) throws InvalidPasswordException, NoUserException, DataAccessException {
         UserData user = userDao.getUser(username);
-        if (!user.password().equals(RegisterService.hashPassword(password))) {
+        if (!RegisterService.isPasswordMatch(password,user.password())) {
             throw new InvalidPasswordException("The password hashes did not match");
         }
         AuthData authData = createNewAuthData(username);

@@ -6,6 +6,7 @@ import dataaccess.memorydao.MemoryUserDAO;
 import handler.UsernameAlreadyTakenException;
 import model.AuthData;
 import model.UserData;
+import org.mindrot.jbcrypt.BCrypt;
 import server.ServerConfig;
 
 import java.util.Collection;
@@ -15,8 +16,10 @@ public class RegisterService {
     AuthDAO authDao;
 
     public static String hashPassword(String originalPassword) {
-        // todo: Use an actual password hashing algorithm, this is just here to show the method
-        return Integer.toString(originalPassword.hashCode());
+        return BCrypt.hashpw(originalPassword,BCrypt.gensalt());
+    }
+    public static boolean isPasswordMatch(String originalPassword, String hashed) {
+        return BCrypt.checkpw(originalPassword, hashed);
     }
 
     public RegisterService() {
