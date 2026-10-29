@@ -65,6 +65,7 @@ public class SQLUserDAO implements UserDAO {
             statement.setString(1,userData.username());
             statement.setString(2,userData.password());
             statement.setString(3,userData.email());
+            statement.executeUpdate();
         } catch(SQLException e) {
             throw new DataAccessException("Error Accessing Database");
         }
