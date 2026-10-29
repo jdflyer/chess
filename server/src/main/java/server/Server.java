@@ -1,5 +1,7 @@
 package server;
 
+import dataaccess.DataAccessException;
+import dataaccess.DatabaseManager;
 import handler.DatabaseHandler;
 import handler.GameHandler;
 import handler.SessionHandler;
@@ -11,6 +13,15 @@ public class Server {
     private final Javalin javalin;
 
     public Server() {
+        if (ServerConfig.databaseType == ServerConfig.DatabaseType.SQL) {
+            try{
+                // Call the function every time, it will only create a database if it doesn't exist
+                DatabaseManager.createDatabase();
+            } catch(DataAccessException e) {
+                throw new RuntimeException("Could not create a database! Is mysql running and connected?");
+            }
+        }
+
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         javalin.delete("/db", context -> new DatabaseHandler(context).handleClear());

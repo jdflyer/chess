@@ -6,5 +6,5 @@ public class ServerConfig {
         SQL
     };
 
-    public static DatabaseType databaseType = DatabaseType.MEMORY;
+    public static DatabaseType databaseType = DatabaseType.SQL;
 }
