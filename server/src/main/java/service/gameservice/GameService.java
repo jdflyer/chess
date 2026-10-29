@@ -3,6 +3,7 @@ package service.gameservice;
 import chess.ChessGame;
 import dataaccess.*;
 import dataaccess.memorydao.MemoryGameDAO;
+import dataaccess.sqldao.SQLGameDAO;
 import model.GameData;
 import server.ServerConfig;
 
@@ -14,6 +15,8 @@ public class GameService {
     public GameService() {
         if (ServerConfig.databaseType == ServerConfig.DatabaseType.MEMORY) {
             this.gameDAO = new MemoryGameDAO();
+        }else if (ServerConfig.databaseType == ServerConfig.DatabaseType.SQL) {
+            this.gameDAO = new SQLGameDAO();
         }
     }
 

@@ -75,10 +75,10 @@ public abstract class Handler {
         return ctx.header("authorization");
     }
 
-    protected boolean isValidAuthToken() {
+    protected boolean isValidAuthToken() throws DataAccessException {
         try {
             return new SessionService().isValidAuth(getAuthToken());
-        } catch (InvalidAuthHeaderException|DataAccessException e) {
+        } catch (InvalidAuthHeaderException e) {
             return false;
         }
     }

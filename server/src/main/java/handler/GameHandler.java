@@ -25,12 +25,11 @@ public class GameHandler extends Handler {
     }
 
     public void handleListGames() {
-        if (!isValidAuthToken()) {
-            setUnauthorizedError();
-            return;
-        }
-
         try {
+            if (!isValidAuthToken()) {
+                setUnauthorizedError();
+                return;
+            }
             setResponse(gameService.listAllGames());
         }catch (DataAccessException e) {
             setInternalServerError(e);
@@ -38,12 +37,11 @@ public class GameHandler extends Handler {
     }
 
     public void handleCreateGame() {
-        if (!isValidAuthToken()) {
-            setUnauthorizedError();
-            return;
-        }
-
         try {
+            if (!isValidAuthToken()) {
+                setUnauthorizedError();
+                return;
+            }
             int gameId = gameService.createGame(getRequestData(GameCreateParams.class).gameName());
             setResponse(new GameCreateResponse(gameId));
         }catch (JsonSyntaxException e) {
@@ -54,12 +52,11 @@ public class GameHandler extends Handler {
     }
 
     public void handleJoinGame() {
-        if (!isValidAuthToken()) {
-            setUnauthorizedError();
-            return;
-        }
-
         try {
+            if (!isValidAuthToken()) {
+                setUnauthorizedError();
+                return;
+            }
             var requestData = getRequestData(GameJoinParams.class);
 
             ChessGame.TeamColor color;
