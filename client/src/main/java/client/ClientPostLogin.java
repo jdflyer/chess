@@ -1,8 +1,7 @@
 package client;
 
 public class ClientPostLogin {
-
-    void handlePostLogin(String input) {
+    void postLoginMain(String input) {
         input = input.toLowerCase().trim();
         switch (input) {
             case "help":

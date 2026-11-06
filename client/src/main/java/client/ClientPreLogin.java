@@ -9,7 +9,7 @@ public class ClientPreLogin {
         return true;
     }
 
-    void handlePreLogin(String input) {
+    void preLoginMain(String input) {
         input = input.toLowerCase().trim();
         switch (input) {
             case "help":

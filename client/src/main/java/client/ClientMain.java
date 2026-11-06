@@ -17,14 +17,14 @@ public class ClientMain {
 
     public State state;
     Scanner scanner;
-    ServerFacadeInterface facade;
+    public ServerFacadeInterface facade;
     ClientPreLogin clientPreLogin;
     ClientPostLogin clientPostLogin;
 
     ClientMain() {
         state = State.LOGGED_OUT;
         scanner = new Scanner(System.in);
-        facade = new ServerFacade();
+        facade = new ServerFacade(8080);
         clientPreLogin = new ClientPreLogin();
         clientPostLogin = new ClientPostLogin();
     }
@@ -35,8 +35,8 @@ public class ClientMain {
             System.out.print("["+state.toString()+"]> ");
             String input = scanner.nextLine();
             switch (state) {
-                case LOGGED_OUT -> clientPreLogin.handlePreLogin(input);
-                case LOGGED_IN -> clientPostLogin.handlePostLogin(input);
+                case LOGGED_OUT -> clientPreLogin.preLoginMain(input);
+                case LOGGED_IN -> clientPostLogin.postLoginMain(input);
             }
         }
     }
