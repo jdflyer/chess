@@ -16,6 +16,7 @@ public class ClientPostLogin {
                 break;
             case "logout":
                 ClientMain.getSingleton().state = ClientMain.State.LOGGED_OUT;
+                ClientMain.getSingleton().authData = null;
                 break;
             case "create":
                 break;

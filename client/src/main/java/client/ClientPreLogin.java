@@ -1,12 +1,33 @@
 package client;
 
+import model.AuthData;
+import model.UserData;
+import serverfacade.BadRequestException;
+import serverfacade.UsernameTakenException;
+
 public class ClientPreLogin {
     boolean handleLogin() {
         return true;
     }
 
     boolean handleRegister() {
-        return true;
+        System.out.print("Please type in your username: ");
+        String username = ClientMain.getSingleton().scanner.nextLine().trim();
+        System.out.print("Please type in your password: ");
+        String password = ClientMain.getSingleton().scanner.nextLine().trim();
+        System.out.print("Please type in your email: ");
+        String email = ClientMain.getSingleton().scanner.nextLine().trim();
+
+        try {
+            ClientMain.getSingleton().authData = ClientMain.getSingleton().facade.register(
+                    new UserData(username,password,email));
+            return true;
+        }catch (UsernameTakenException e) {
+            System.out.println("Error while registering user: Username already taken");
+        }catch (BadRequestException e) {
+            System.out.println("Error communicating to server while registering user!");
+        }
+        return false;
     }
 
     void preLoginMain(String input) {
