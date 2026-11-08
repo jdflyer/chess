@@ -1,6 +1,47 @@
 package client;
 
+import model.GameList;
+import serverfacade.BadRequestException;
+import serverfacade.InvalidSessionException;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class ClientPostLogin {
+    // Stores the real Database game IDs. Note: the exposed IDs start at index 1
+    ArrayList<Integer> realGameIds;
+
+    void handleLogout() {
+        ClientMain.getSingleton().state = ClientMain.State.LOGGED_OUT;
+        ClientMain.getSingleton().authData = null;
+    }
+
+    void handleLogout_InvalidSession() {
+        System.out.println("Access Denied! Now logging out...");
+        handleLogout();
+    }
+
+    void listAllGames() {
+        try {
+            GameList list = ClientMain.getSingleton().facade.listAllGames();
+            realGameIds.clear();
+            if (list.games().length == 0) {
+                System.out.println("There are no currently running games.");
+                return;
+            }
+            for (var game : list.games()) {
+                realGameIds.add(game.gameID());
+                int playerCount = game.blackUsername() == null ? 0 : 1;
+                playerCount += game.whiteUsername() == null ? 0 : 1;
+                System.out.println("["+realGameIds.size()+"] "+game.gameName()+" ("+playerCount+"/2 Players)");
+            }
+        }catch (InvalidSessionException e) {
+            handleLogout_InvalidSession();
+        }catch (BadRequestException e) {
+            ClientMain.printBadRequest();
+        }
+    }
+
     void postLoginMain(String input) {
         input = input.toLowerCase().trim();
         switch (input) {
@@ -16,12 +57,12 @@ public class ClientPostLogin {
                 break;
             case "logout":
                 ClientMain.getSingleton().facade.logout();
-                ClientMain.getSingleton().state = ClientMain.State.LOGGED_OUT;
-                ClientMain.getSingleton().authData = null;
+                handleLogout();
                 break;
             case "create":
                 break;
             case "list":
+                listAllGames();
                 break;
             case "join":
                 break;

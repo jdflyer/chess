@@ -21,7 +21,7 @@ public class ClientPreLogin {
         }catch (InvalidUsernamePasswordException e) {
             System.out.println("Invalid Username or Password!");
         }catch (BadRequestException e) {
-            System.out.println("Error communicating to server while logging in!");
+            ClientMain.printBadRequest();
         }
         return false;
     }
@@ -41,7 +41,7 @@ public class ClientPreLogin {
         }catch (UsernameTakenException e) {
             System.out.println("Error registering user: The username "+username+" is already taken!");
         }catch (BadRequestException e) {
-            System.out.println("Error communicating to server while registering user!");
+            ClientMain.printBadRequest();
         }
         return false;
     }

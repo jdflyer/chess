@@ -3,9 +3,7 @@ package serverfacade;
 import client.ClientMain;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-import model.AuthData;
-import model.LoginData;
-import model.UserData;
+import model.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.RecordComponent;
@@ -14,6 +12,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Collection;
 import java.util.Locale;
 
 public class ServerFacade implements ServerFacadeInterface {
@@ -118,6 +117,21 @@ public class ServerFacade implements ServerFacadeInterface {
             var response = delete("/session");
         }catch (Exception e){
             return;
+        }
+    }
+
+    public GameList listAllGames() throws BadRequestException, InvalidSessionException {
+        try {
+            var response = get("/game");
+            return switch (response.statusCode()) {
+                case STATUS_OK -> deserializeRecord(response.body(),GameList.class);
+                case STATUS_UNAUTHORIZED -> throw new InvalidSessionException("Not authorized!");
+                default -> throw new BadRequestException("");
+            };
+        }catch (InvalidSessionException e) {
+            throw e;
+        }catch (Exception e) {
+            throw new BadRequestException("Bad request");
         }
     }
 }

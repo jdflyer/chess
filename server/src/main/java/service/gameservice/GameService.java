@@ -2,9 +2,9 @@ package service.gameservice;
 
 import chess.ChessGame;
 import dataaccess.*;
-import dataaccess.memorydao.MemoryGameDAO;
-import dataaccess.sqldao.SQLGameDAO;
 import model.GameData;
+import model.GameList;
+import model.GameMetadata;
 import server.ServerConfig;
 
 import java.util.Collection;

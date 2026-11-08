@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import service.gameservice.GameJoinTeamTakenException;
-import service.gameservice.GameList;
+import model.GameList;
 import service.gameservice.GameService;
 
 public class GameServiceTests {

@@ -47,4 +47,8 @@ public class ClientMain {
     public static void main(String[] args) {
         singleton.run();
     }
+
+    public static void printBadRequest() {
+        System.out.println("Error communicating to server!");
+    }
 }

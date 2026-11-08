@@ -1,4 +1,4 @@
-package service.gameservice;
+package model;
 
 public record GameList(GameMetadata[] games) {
 }

@@ -1,8 +1,8 @@
 package serverfacade;
 
-import model.AuthData;
-import model.LoginData;
-import model.UserData;
+import model.*;
+
+import java.util.Collection;
 
 public interface ServerFacadeInterface {
     public AuthData register(UserData userData) throws BadRequestException, UsernameTakenException;
@@ -10,4 +10,6 @@ public interface ServerFacadeInterface {
 
     // Always succeeds, the server should handle stale sessions
     public void logout();
+
+    public GameList listAllGames() throws BadRequestException, InvalidSessionException;
 }
