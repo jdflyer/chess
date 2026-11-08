@@ -1,7 +1,9 @@
 package client;
 
 import model.GameCreateParams;
+import model.GameJoinParams;
 import model.GameList;
+import model.GameMetadata;
 import serverfacade.BadRequestException;
 import serverfacade.InvalidSessionException;
 
@@ -10,7 +12,7 @@ import java.util.HashMap;
 
 public class ClientPostLogin {
     // Stores the real Database game IDs. Note: the exposed IDs start at index 1
-    ArrayList<Integer> realGameIds = new ArrayList<>();
+    GameList gameList;
 
     void handleLogout() {
         ClientMain.getSingleton().state = ClientMain.State.LOGGED_OUT;
@@ -24,17 +26,17 @@ public class ClientPostLogin {
 
     void listAllGames() {
         try {
-            GameList list = ClientMain.getSingleton().facade.listAllGames();
-            realGameIds.clear();
-            if (list.games().length == 0) {
+            gameList = ClientMain.getSingleton().facade.listAllGames();
+            if (gameList.games().length == 0) {
                 System.out.println("There are no currently running games.");
                 return;
             }
-            for (var game : list.games()) {
-                realGameIds.add(game.gameID());
+            int currentGame = 1;
+            for (var game : gameList.games()) {
                 int playerCount = game.blackUsername() == null ? 0 : 1;
                 playerCount += game.whiteUsername() == null ? 0 : 1;
-                System.out.println("["+realGameIds.size()+"] "+game.gameName()+" ("+playerCount+"/2 Players)");
+                System.out.println("["+currentGame+"] "+game.gameName()+" ("+playerCount+"/2 Players)");
+                currentGame += 1;
             }
         }catch (InvalidSessionException e) {
             handleLogout_InvalidSession();
@@ -54,6 +56,65 @@ public class ClientPostLogin {
         }catch (BadRequestException e) {
             ClientMain.printBadRequest();
         }
+    }
+
+    // Calls "list" and then prompts for a game ID
+    GameMetadata getGameFromUser() throws InvalidGameIdException {
+        System.out.println("Current games:");
+        listAllGames();
+        if (gameList == null) {
+            throw new InvalidGameIdException("Couldn't get game list from server!");
+        }
+        System.out.print("Which game would you like to join?\nEnter Game ID: ");
+        String id = ClientMain.getSingleton().scanner.nextLine().trim();
+        int gameId;
+        try {
+            gameId = Integer.parseInt(id) - 1;
+        }catch (NumberFormatException e) {
+            throw new InvalidGameIdException("Invalid game ID!");
+        }
+
+        if (gameId < 0 || gameId >= gameList.games().length) {
+            throw new InvalidGameIdException("Invalid game ID!");
+        }
+        return gameList.games()[gameId];
+    }
+
+    void joinGame() {
+        try {
+            GameMetadata metadata = getGameFromUser();
+            System.out.print("Which team would you like to join (White/Black): ");
+            String teamToJoin = ClientMain.getSingleton().scanner.nextLine().trim().toLowerCase();
+            String teamJoinParam = null;
+            switch (teamToJoin) {
+                case "w":
+                case "white":
+                    if (metadata.whiteUsername() != null) {
+                        System.out.println("Could not join game! Player "+metadata.whiteUsername()+" is already on the White team!");
+                        return;
+                    }
+                    teamJoinParam = "WHITE";
+                    break;
+                case "b":
+                case "black":
+                    if (metadata.blackUsername() != null) {
+                        System.out.println("Could not join game! Player "+metadata.blackUsername()+" is already on the Black team!");
+                        return;
+                    }
+                    teamJoinParam = "BLACK";
+                    break;
+                default:
+                    System.out.println("Invalid Team!");
+                    return;
+            }
+            ClientMain.getSingleton().facade.joinGame(new GameJoinParams(teamJoinParam,metadata.gameID()));
+        }catch (InvalidGameIdException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    void observeGame() {
+
     }
 
     void postLoginMain(String input) {
@@ -80,6 +141,7 @@ public class ClientPostLogin {
                 listAllGames();
                 break;
             case "join":
+                joinGame();
                 break;
             case "observe":
                 break;

@@ -149,4 +149,23 @@ public class ServerFacade implements ServerFacadeInterface {
             throw new BadRequestException("Bad request");
         }
     }
+
+    public void joinGame(GameJoinParams joinParams) throws BadRequestException, InvalidSessionException {
+        try {
+            var response = put("/game",serialize(joinParams));
+            // We already handle not joining a taken team on the client side (when joining), so we won't handle that error here
+            switch (response.statusCode()) {
+                case STATUS_OK:
+                    return;
+                case STATUS_UNAUTHORIZED:
+                    throw new InvalidSessionException("Not authorized!");
+                default:
+                    throw new BadRequestException("");
+            }
+        }catch (InvalidSessionException e) {
+            throw e;
+        }catch (Exception e) {
+            throw new BadRequestException("Bad request");
+        }
+    }
 }
