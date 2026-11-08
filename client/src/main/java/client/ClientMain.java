@@ -17,7 +17,7 @@ public class ClientMain {
     };
 
     public State state;
-    Scanner scanner;
+    public Scanner scanner;
     public ServerFacadeInterface facade;
     public AuthData authData;
     ClientPreLogin clientPreLogin;

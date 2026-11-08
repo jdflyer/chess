@@ -6,6 +6,7 @@ import model.GameList;
 import model.GameMetadata;
 import serverfacade.BadRequestException;
 import serverfacade.InvalidSessionException;
+import ui.ChessUIMain;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -108,6 +109,7 @@ public class ClientPostLogin {
                     return;
             }
             ClientMain.getSingleton().facade.joinGame(new GameJoinParams(teamJoinParam,metadata.gameID()));
+            new ChessUIMain(teamJoinParam.equals("BLACK")).run();
         }catch (InvalidGameIdException e) {
             System.out.println(e.getMessage());
         }
@@ -117,7 +119,7 @@ public class ClientPostLogin {
         // Currently doesn't communicate to server, just displays the game UI
         try {
             GameMetadata metadata = getGameFromUser();
-            // enter game UI
+            new ChessUIMain(false).run();
         }catch (InvalidGameIdException e) {
             System.out.println(e.getMessage());
         }
@@ -150,6 +152,7 @@ public class ClientPostLogin {
                 joinGame();
                 break;
             case "observe":
+                observeGame();
                 break;
             default:
                 System.out.println("Unrecognized command. Type help for a list of commands.");
