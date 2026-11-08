@@ -114,7 +114,13 @@ public class ClientPostLogin {
     }
 
     void observeGame() {
-
+        // Currently doesn't communicate to server, just displays the game UI
+        try {
+            GameMetadata metadata = getGameFromUser();
+            // enter game UI
+        }catch (InvalidGameIdException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     void postLoginMain(String input) {
