@@ -1,13 +1,29 @@
 package client;
 
 import model.AuthData;
+import model.LoginData;
 import model.UserData;
 import serverfacade.BadRequestException;
+import serverfacade.InvalidUsernamePasswordException;
 import serverfacade.UsernameTakenException;
 
 public class ClientPreLogin {
     boolean handleLogin() {
-        return true;
+        System.out.print("Username: ");
+        String username = ClientMain.getSingleton().scanner.nextLine().trim();
+        System.out.print("Password: ");
+        String password = ClientMain.getSingleton().scanner.nextLine().trim();
+
+        try {
+            ClientMain.getSingleton().authData = ClientMain.getSingleton().facade.login(
+                    new LoginData(username,password));
+            return true;
+        }catch (InvalidUsernamePasswordException e) {
+            System.out.println("Invalid Username or Password!");
+        }catch (BadRequestException e) {
+            System.out.println("Error communicating to server while logging in!");
+        }
+        return false;
     }
 
     boolean handleRegister() {
@@ -23,7 +39,7 @@ public class ClientPreLogin {
                     new UserData(username,password,email));
             return true;
         }catch (UsernameTakenException e) {
-            System.out.println("Error while registering user: Username already taken");
+            System.out.println("Error registering user: The username "+username+" is already taken!");
         }catch (BadRequestException e) {
             System.out.println("Error communicating to server while registering user!");
         }

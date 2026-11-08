@@ -4,6 +4,7 @@ import client.ClientMain;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import model.AuthData;
+import model.LoginData;
 import model.UserData;
 
 import java.lang.reflect.InvocationTargetException;
@@ -25,6 +26,7 @@ public class ServerFacade implements ServerFacadeInterface {
         HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(new URI(url))
                 .timeout(java.time.Duration.ofMillis(5000));
+        // Add authorization to the request if the client is logged in
         if (ClientMain.getSingleton().authData != null) {
             builder = builder.header("authorization",ClientMain.getSingleton().authData.authToken());
         }
@@ -80,13 +82,11 @@ public class ServerFacade implements ServerFacadeInterface {
     public AuthData register(UserData userData) throws UsernameTakenException, BadRequestException {
         try {
             var response = post("/user",serialize(userData));
-            if (response.statusCode() == 200) {
-                return deserializeRecord(response.body(),AuthData.class);
-            }else if (response.statusCode() == 403) {
-                throw new UsernameTakenException("Username already taken!");
-            }else {
-                throw new BadRequestException("");
-            }
+            return switch (response.statusCode()) {
+                case 200 -> deserializeRecord(response.body(), AuthData.class);
+                case 403 -> throw new UsernameTakenException("Username already taken!");
+                default -> throw new BadRequestException("");
+            };
         }catch (UsernameTakenException e) {
             throw e;
         }catch (Exception e) {
@@ -94,8 +94,19 @@ public class ServerFacade implements ServerFacadeInterface {
         }
     }
 
-    public AuthData login(String username, String password) {
-        return new AuthData("","");
+    public AuthData login(LoginData loginData) throws InvalidUsernamePasswordException, BadRequestException {
+        try {
+            var response = post("/session",serialize(loginData));
+            return switch (response.statusCode()) {
+                case 200 -> deserializeRecord(response.body(), AuthData.class);
+                case 403 -> throw new UsernameTakenException("Username already taken!");
+                default -> throw new BadRequestException("");
+            };
+        }catch (InvalidUsernamePasswordException e) {
+            throw e;
+        }catch (Exception e) {
+            throw new BadRequestException("Failed!");
+        }
     }
 
     public void logout() {

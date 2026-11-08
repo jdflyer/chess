@@ -5,6 +5,7 @@ import dataaccess.DataAccessException;
 import dataaccess.InvalidAuthTokenException;
 import dataaccess.NoUserException;
 import io.javalin.http.Context;
+import model.LoginData;
 import service.InvalidPasswordException;
 import service.SessionService;
 
