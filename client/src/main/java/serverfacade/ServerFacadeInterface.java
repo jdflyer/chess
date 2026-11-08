@@ -12,4 +12,5 @@ public interface ServerFacadeInterface {
     public void logout();
 
     public GameList listAllGames() throws BadRequestException, InvalidSessionException;
+    public GameCreateResponse createGame(GameCreateParams gameCreateParams) throws BadRequestException, InvalidSessionException;
 }

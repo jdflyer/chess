@@ -134,4 +134,19 @@ public class ServerFacade implements ServerFacadeInterface {
             throw new BadRequestException("Bad request");
         }
     }
+
+    public GameCreateResponse createGame(GameCreateParams gameCreateParams) throws BadRequestException, InvalidSessionException {
+        try {
+            var response = post("/game",serialize(gameCreateParams));
+            return switch (response.statusCode()) {
+                case STATUS_OK -> deserializeRecord(response.body(),GameCreateResponse.class);
+                case STATUS_UNAUTHORIZED -> throw new InvalidSessionException("Not authorized!");
+                default -> throw new BadRequestException("");
+            };
+        }catch (InvalidSessionException e) {
+            throw e;
+        }catch (Exception e) {
+            throw new BadRequestException("Bad request");
+        }
+    }
 }

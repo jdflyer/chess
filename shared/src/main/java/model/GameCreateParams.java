@@ -1,4 +1,4 @@
-package handler.gamehandler;
+package model;
 
 public record GameCreateParams(String gameName) {
 }

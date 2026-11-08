@@ -1,5 +1,6 @@
 package client;
 
+import model.GameCreateParams;
 import model.GameList;
 import serverfacade.BadRequestException;
 import serverfacade.InvalidSessionException;
@@ -9,7 +10,7 @@ import java.util.HashMap;
 
 public class ClientPostLogin {
     // Stores the real Database game IDs. Note: the exposed IDs start at index 1
-    ArrayList<Integer> realGameIds;
+    ArrayList<Integer> realGameIds = new ArrayList<>();
 
     void handleLogout() {
         ClientMain.getSingleton().state = ClientMain.State.LOGGED_OUT;
@@ -42,6 +43,19 @@ public class ClientPostLogin {
         }
     }
 
+    void createGame() {
+        try {
+            System.out.print("Game Name: ");
+            String gameName = ClientMain.getSingleton().scanner.nextLine().trim();
+            int dbGameId = ClientMain.getSingleton().facade.createGame(new GameCreateParams(gameName)).gameID();
+            System.out.println("Successfully created game \""+gameName+"\"! Use the list command to see its id.");
+        }catch (InvalidSessionException e) {
+            handleLogout_InvalidSession();
+        }catch (BadRequestException e) {
+            ClientMain.printBadRequest();
+        }
+    }
+
     void postLoginMain(String input) {
         input = input.toLowerCase().trim();
         switch (input) {
@@ -60,6 +74,7 @@ public class ClientPostLogin {
                 handleLogout();
                 break;
             case "create":
+                createGame();
                 break;
             case "list":
                 listAllGames();
