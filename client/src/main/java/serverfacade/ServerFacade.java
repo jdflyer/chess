@@ -21,6 +21,10 @@ public class ServerFacade implements ServerFacadeInterface {
     final String serverAddress;
     final int serverPort;
 
+    private final int STATUS_OK = 200;
+    private final int STATUS_UNAUTHORIZED = 401;
+    private final int STATUS_ERROR = 500;
+
     private HttpRequest.Builder getUrlBuilder(String path) throws URISyntaxException {
         String url = String.format(Locale.getDefault(), "http://%s:%d%s",serverAddress,serverPort,path);
         HttpRequest.Builder builder = HttpRequest.newBuilder()
@@ -83,7 +87,7 @@ public class ServerFacade implements ServerFacadeInterface {
         try {
             var response = post("/user",serialize(userData));
             return switch (response.statusCode()) {
-                case 200 -> deserializeRecord(response.body(), AuthData.class);
+                case STATUS_OK -> deserializeRecord(response.body(), AuthData.class);
                 case 403 -> throw new UsernameTakenException("Username already taken!");
                 default -> throw new BadRequestException("");
             };
@@ -98,8 +102,8 @@ public class ServerFacade implements ServerFacadeInterface {
         try {
             var response = post("/session",serialize(loginData));
             return switch (response.statusCode()) {
-                case 200 -> deserializeRecord(response.body(), AuthData.class);
-                case 403 -> throw new UsernameTakenException("Username already taken!");
+                case STATUS_OK -> deserializeRecord(response.body(), AuthData.class);
+                case STATUS_UNAUTHORIZED -> throw new InvalidUsernamePasswordException("Username already taken!");
                 default -> throw new BadRequestException("");
             };
         }catch (InvalidUsernamePasswordException e) {
@@ -110,6 +114,10 @@ public class ServerFacade implements ServerFacadeInterface {
     }
 
     public void logout() {
-
+        try {
+            var response = delete("/session");
+        }catch (Exception e){
+            return;
+        }
     }
 }

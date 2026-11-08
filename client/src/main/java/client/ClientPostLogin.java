@@ -15,6 +15,7 @@ public class ClientPostLogin {
                         \tobserve: request to observe a game""");
                 break;
             case "logout":
+                ClientMain.getSingleton().facade.logout();
                 ClientMain.getSingleton().state = ClientMain.State.LOGGED_OUT;
                 ClientMain.getSingleton().authData = null;
                 break;
