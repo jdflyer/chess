@@ -45,23 +45,29 @@ public class ChessUIMain {
 
     private final String TEXT_WHITE = EscapeSequences.SET_TEXT_COLOR_WHITE;
     private final String TEXT_BLACK = EscapeSequences.SET_TEXT_COLOR_BLACK;
-    private final String TEXT_EMPTY = "   ";
+    private final String TEXT_MAIN = TEXT_WHITE;
+    private final String TEXT_EMPTY = EscapeSequences.EMPTY;
 
-    void printEmptyRow() {
-        System.out.print(BG_MAIN);
-        for (int i = 0; i<10;i++) {
-            System.out.print(EscapeSequences.EMPTY);
+    void printHeaderRow() {
+        System.out.print(BG_MAIN+TEXT_MAIN);
+        System.out.print(EscapeSequences.EMPTY);
+        for (int i = 0; i<8;i++) {
+            char charToPrint = viewFromBlackTeam ? (char)('h'-i) : (char)('a'+i);
+            System.out.print(" "+charToPrint+" ");
         }
+        System.out.print(EscapeSequences.EMPTY);
         System.out.print(EscapeSequences.RESET_TEXT_COLOR+EscapeSequences.RESET_BG_COLOR+"\n");
     }
 
     void drawBoard() {
-        printEmptyRow();
+        System.out.print(EscapeSequences.ERASE_SCREEN);
+        printHeaderRow();
         for (int r = 0; r < 8; r++) {
-            System.out.print(BG_MAIN+TEXT_EMPTY);
+            int chessRow = viewFromBlackTeam ? r+1 : 8-r;
+            System.out.print(BG_MAIN+TEXT_MAIN+" "+chessRow+" ");
             for (int c = 0; c < 8; c++) {
                 String bgColor = (r+c) % 2 == 0 ? BG_WHITE : BG_BLACK;
-                ChessPosition pos = viewFromBlackTeam ? new ChessPosition(r+1,8-c) : new ChessPosition(8-r,c+1) ;
+                ChessPosition pos = viewFromBlackTeam ? new ChessPosition(chessRow,8-c) : new ChessPosition(chessRow,c+1) ;
                 ChessPiece piece = currentGame.getBoard().getPiece(pos);
                 System.out.print(bgColor);
                 if (piece == null) {
@@ -72,9 +78,9 @@ public class ChessUIMain {
                 System.out.print(textColor);
                 System.out.print(pieceToString(piece));
             }
-            System.out.print(BG_MAIN+TEXT_EMPTY+EscapeSequences.RESET_BG_COLOR+"\n");
+            System.out.print(BG_MAIN+TEXT_MAIN+" "+chessRow+" "+EscapeSequences.RESET_BG_COLOR+"\n");
         }
-        printEmptyRow();
+        printHeaderRow();
     }
 
     public void run() {
