@@ -4,6 +4,7 @@ import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
+import serverfacade.BadRequestException;
 import serverfacade.ServerFacade;
 import serverfacade.UsernameTakenException;
 import service.DatabaseService;
@@ -47,6 +48,16 @@ public class ServerFacadeTests {
             auth = facade.register(new UserData("test","test","test@example.com"));
             throw new Exception("Should've thrown UsernameTakenException!");
         }catch (UsernameTakenException e) {
+            return;
+        }
+    }
+
+    @Test
+    public void registerBadUserData() throws Exception {
+        try {
+            AuthData auth = facade.register(new UserData(null,null,null));
+            throw new Exception("Should've thrown BadRequestException!");
+        }catch (BadRequestException e) {
             return;
         }
     }
