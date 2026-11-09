@@ -4,10 +4,7 @@ import dataaccess.DataAccessException;
 import model.*;
 import org.junit.jupiter.api.*;
 import server.Server;
-import serverfacade.BadRequestException;
-import serverfacade.InvalidUsernamePasswordException;
-import serverfacade.ServerFacade;
-import serverfacade.UsernameTakenException;
+import serverfacade.*;
 import service.DatabaseService;
 import service.SessionService;
 
@@ -119,6 +116,28 @@ public class ServerFacadeTests {
         ClientMain.getSingleton().authData = auth;
         GameCreateResponse r = facade.createGame(new GameCreateParams("game"));
         assert(r != null);
+    }
+
+    @Test
+    public void createGameNoAuthTest() {
+        try {
+            GameCreateResponse r = facade.createGame(new GameCreateParams("game"));
+            throw new RuntimeException("Should've thrown InvalidSessionException");
+        }catch (InvalidSessionException e) {
+            return;
+        }
+    }
+
+    @Test
+    public void createGameBadRequestTest() {
+        AuthData auth = facade.register(new UserData("test","test","test@example.com"));
+        ClientMain.getSingleton().authData = auth;
+        try {
+            GameCreateResponse r = facade.createGame(new GameCreateParams(null));
+            throw new RuntimeException("Should've thrown BadRequestException");
+        }catch (BadRequestException e) {
+            return;
+        }
     }
 
 }
