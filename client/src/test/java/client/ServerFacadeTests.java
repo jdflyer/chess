@@ -159,4 +159,38 @@ public class ServerFacadeTests {
             return;
         }
     }
+
+    @Test
+    public void joinGameTest() {
+        AuthData auth = facade.register(new UserData("test","test","test@example.com"));
+        ClientMain.getSingleton().authData = auth;
+        GameCreateResponse r = facade.createGame(new GameCreateParams("game"));
+        facade.joinGame(new GameJoinParams("WHITE",r.gameID()));
+    }
+
+    @Test
+    public void joinGameNoAuthTest() {
+        AuthData auth = facade.register(new UserData("test","test","test@example.com"));
+        ClientMain.getSingleton().authData = auth;
+        GameCreateResponse r = facade.createGame(new GameCreateParams("game"));
+        ClientMain.getSingleton().authData = null;
+        try {
+            facade.joinGame(new GameJoinParams("WHITE",r.gameID()));
+            throw new RuntimeException("Should've thrown InvalidSessionException");
+        }catch (InvalidSessionException e) {
+            return;
+        }
+    }
+
+    @Test
+    public void joinGameBadRequestTest() {
+        AuthData auth = facade.register(new UserData("test","test","test@example.com"));
+        ClientMain.getSingleton().authData = auth;
+        try {
+            facade.joinGame(new GameJoinParams(null,1));
+            throw new RuntimeException("Should've thrown BadRequestException");
+        }catch (BadRequestException e) {
+            return;
+        }
+    }
 }
