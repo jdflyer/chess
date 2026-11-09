@@ -20,9 +20,9 @@ public class ServerFacade implements ServerFacadeInterface {
     final String serverAddress;
     final int serverPort;
 
-    private final int STATUS_OK = 200;
-    private final int STATUS_UNAUTHORIZED = 401;
-    private final int STATUS_ERROR = 500;
+    private static final int STATUS_OK = 200;
+    private static final int STATUS_UNAUTHORIZED = 401;
+    private static final int STATUS_ERROR = 500;
 
     private HttpRequest.Builder getUrlBuilder(String path) throws URISyntaxException {
         String url = String.format(Locale.getDefault(), "http://%s:%d%s",serverAddress,serverPort,path);

@@ -8,9 +8,6 @@ import serverfacade.BadRequestException;
 import serverfacade.InvalidSessionException;
 import ui.ChessUIMain;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 public class ClientPostLogin {
     // Stores the real Database game IDs. Note: the exposed IDs start at index 1
     GameList gameList;
@@ -20,7 +17,7 @@ public class ClientPostLogin {
         ClientMain.getSingleton().authData = null;
     }
 
-    void handleLogout_InvalidSession() {
+    void handleLogoutInvalidSession() {
         System.out.println("Access Denied! Now logging out...");
         handleLogout();
     }
@@ -40,7 +37,7 @@ public class ClientPostLogin {
                 currentGame += 1;
             }
         }catch (InvalidSessionException e) {
-            handleLogout_InvalidSession();
+            handleLogoutInvalidSession();
         }catch (BadRequestException e) {
             ClientMain.printBadRequest();
         }
@@ -53,7 +50,7 @@ public class ClientPostLogin {
             int dbGameId = ClientMain.getSingleton().facade.createGame(new GameCreateParams(gameName)).gameID();
             System.out.println("Successfully created game \""+gameName+"\"! Use the list command to see its id.");
         }catch (InvalidSessionException e) {
-            handleLogout_InvalidSession();
+            handleLogoutInvalidSession();
         }catch (BadRequestException e) {
             ClientMain.printBadRequest();
         }

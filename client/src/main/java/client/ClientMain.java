@@ -7,8 +7,8 @@ import serverfacade.ServerFacadeInterface;
 import java.util.Scanner;
 
 public class ClientMain {
-    private static final ClientMain singleton = new ClientMain();
-    public static ClientMain getSingleton() { return singleton; }
+    private static final ClientMain SINGLETON = new ClientMain();
+    public static ClientMain getSingleton() { return SINGLETON; }
 
     public enum State {
         LOGGED_OUT,
@@ -45,7 +45,7 @@ public class ClientMain {
     }
 
     public static void main(String[] args) {
-        singleton.run();
+        SINGLETON.run();
     }
 
     public static void printBadRequest() {

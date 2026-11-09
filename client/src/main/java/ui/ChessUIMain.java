@@ -39,14 +39,14 @@ public class ChessUIMain {
         }
     }
 
-    private final String BG_MAIN = EscapeSequences.SET_BG_COLOR_DARK_GREEN;
-    private final String BG_BLACK = EscapeSequences.SET_BG_COLOR_DARK_GREY;
-    private final String BG_WHITE = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
+    private static final String BG_MAIN = EscapeSequences.SET_BG_COLOR_DARK_GREEN;
+    private static final String BG_BLACK = EscapeSequences.SET_BG_COLOR_DARK_GREY;
+    private static final String BG_WHITE = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
 
-    private final String TEXT_WHITE = EscapeSequences.SET_TEXT_COLOR_WHITE;
-    private final String TEXT_BLACK = EscapeSequences.SET_TEXT_COLOR_BLACK;
-    private final String TEXT_MAIN = TEXT_WHITE;
-    private final String TEXT_EMPTY = EscapeSequences.EMPTY;
+    private static final String TEXT_WHITE = EscapeSequences.SET_TEXT_COLOR_WHITE;
+    private static final String TEXT_BLACK = EscapeSequences.SET_TEXT_COLOR_BLACK;
+    private static final String TEXT_MAIN = TEXT_WHITE;
+    private static final String TEXT_EMPTY = EscapeSequences.EMPTY;
 
     void printHeaderRow() {
         System.out.print(BG_MAIN+TEXT_MAIN);
