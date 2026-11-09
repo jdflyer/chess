@@ -1,9 +1,7 @@
 package client;
 
 import dataaccess.DataAccessException;
-import model.AuthData;
-import model.LoginData;
-import model.UserData;
+import model.*;
 import org.junit.jupiter.api.*;
 import server.Server;
 import serverfacade.BadRequestException;
@@ -114,4 +112,13 @@ public class ServerFacadeTests {
         facade.logout();
         Assertions.assertEquals(0,new SessionService().getAllSessions().size());
     }
+
+    @Test
+    public void createGameTest() {
+        AuthData auth = facade.register(new UserData("test","test","test@example.com"));
+        ClientMain.getSingleton().authData = auth;
+        GameCreateResponse r = facade.createGame(new GameCreateParams("game"));
+        assert(r != null);
+    }
+
 }
