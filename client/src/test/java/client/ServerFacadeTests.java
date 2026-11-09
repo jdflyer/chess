@@ -140,4 +140,23 @@ public class ServerFacadeTests {
         }
     }
 
+    @Test
+    public void listGamesTest() {
+        AuthData auth = facade.register(new UserData("test","test","test@example.com"));
+        ClientMain.getSingleton().authData = auth;
+        GameCreateResponse r = facade.createGame(new GameCreateParams("game"));
+        GameCreateResponse r2 = facade.createGame(new GameCreateParams("game2"));
+        GameList list = facade.listAllGames();
+        Assertions.assertEquals(2,list.games().length);
+    }
+
+    @Test
+    public void listGamesNoAuthTest() {
+        try {
+            facade.listAllGames();
+            throw new RuntimeException("Should've thrown InvalidSessionException");
+        }catch (InvalidSessionException e) {
+            return;
+        }
+    }
 }
