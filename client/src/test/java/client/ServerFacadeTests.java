@@ -1,10 +1,12 @@
 package client;
 
 import model.AuthData;
+import model.LoginData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
 import serverfacade.BadRequestException;
+import serverfacade.InvalidUsernamePasswordException;
 import serverfacade.ServerFacade;
 import serverfacade.UsernameTakenException;
 import service.DatabaseService;
@@ -34,7 +36,6 @@ public class ServerFacadeTests {
         server.stop();
     }
 
-
     @Test
     public void registerTest() {
         AuthData auth = facade.register(new UserData("test","test","test@example.com"));
@@ -56,6 +57,47 @@ public class ServerFacadeTests {
     public void registerBadUserData() throws Exception {
         try {
             AuthData auth = facade.register(new UserData(null,null,null));
+            throw new Exception("Should've thrown BadRequestException!");
+        }catch (BadRequestException e) {
+            return;
+        }
+    }
+
+    @Test
+    public void loginTest() {
+        AuthData auth = facade.register(new UserData("test","test","test@example.com"));
+        AuthData auth2 = facade.login(new LoginData("test","test"));
+        Assertions.assertEquals("test",auth.username());
+        Assertions.assertEquals("test",auth2.username());
+    }
+
+    @Test
+    public void loginTestWrongUsername() throws Exception {
+        AuthData auth = facade.register(new UserData("test","test","test@example.com"));
+        try {
+            AuthData auth2 = facade.login(new LoginData("test2","test"));
+            throw new Exception("Should've thrown InvalidUsernamePasswordException!");
+        }catch (InvalidUsernamePasswordException e) {
+            return;
+        }
+    }
+
+    @Test
+    public void loginTestWrongPassword() throws Exception {
+        AuthData auth = facade.register(new UserData("test","test","test@example.com"));
+        try {
+            AuthData auth2 = facade.login(new LoginData("test","password"));
+            throw new Exception("Should've thrown InvalidUsernamePasswordException!");
+        }catch (InvalidUsernamePasswordException e) {
+            return;
+        }
+    }
+
+    @Test
+    public void loginTestBadRequest() throws Exception {
+        AuthData auth = facade.register(new UserData("test","test","test@example.com"));
+        try {
+            AuthData auth2 = facade.login(new LoginData(null,null));
             throw new Exception("Should've thrown BadRequestException!");
         }catch (BadRequestException e) {
             return;
