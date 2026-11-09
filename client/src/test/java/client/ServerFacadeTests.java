@@ -1,5 +1,6 @@
 package client;
 
+import dataaccess.DataAccessException;
 import model.AuthData;
 import model.LoginData;
 import model.UserData;
@@ -10,6 +11,7 @@ import serverfacade.InvalidUsernamePasswordException;
 import serverfacade.ServerFacade;
 import serverfacade.UsernameTakenException;
 import service.DatabaseService;
+import service.SessionService;
 
 
 public class ServerFacadeTests {
@@ -29,6 +31,7 @@ public class ServerFacadeTests {
     @BeforeEach
     void setupTest() throws Exception {
         new DatabaseService().clearDatabase();
+        ClientMain.getSingleton().authData = null;
     }
 
     @AfterAll
@@ -104,4 +107,11 @@ public class ServerFacadeTests {
         }
     }
 
+    @Test
+    public void logoutTest() throws DataAccessException {
+        AuthData auth = facade.register(new UserData("test","test","test@example.com"));
+        ClientMain.getSingleton().authData = auth;
+        facade.logout();
+        Assertions.assertEquals(0,new SessionService().getAllSessions().size());
+    }
 }
