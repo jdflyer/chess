@@ -58,16 +58,16 @@ public class ClientPreLogin {
                         \tregister: register a new user to the chess server""");
                 break;
             case "quit":
-                ClientMain.getSingleton().state = ClientMain.State.QUIT;
+                ClientMain.getSingleton().switchToQuitState();
                 break;
             case "login":
                 if (handleLogin()) {
-                    ClientMain.getSingleton().state = ClientMain.State.LOGGED_IN;
+                    ClientMain.getSingleton().switchToLoggedInState();
                 }
                 break;
             case "register":
                 if (handleRegister()) {
-                    ClientMain.getSingleton().state = ClientMain.State.LOGGED_IN;
+                    ClientMain.getSingleton().switchToLoggedInState();
                 }
                 break;
             default:

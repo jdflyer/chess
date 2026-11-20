@@ -13,8 +13,7 @@ public class ClientPostLogin {
     GameList gameList;
 
     void handleLogout() {
-        ClientMain.getSingleton().state = ClientMain.State.LOGGED_OUT;
-        ClientMain.getSingleton().authData = null;
+        ClientMain.getSingleton().switchToLoggedOutState();
     }
 
     void handleLogoutInvalidSession() {
@@ -107,7 +106,7 @@ public class ClientPostLogin {
                     return;
             }
             ClientMain.getSingleton().facade.joinGame(new GameJoinParams(teamJoinParam,metadata.gameID()));
-            new ChessUIMain(teamJoinParam.equals("BLACK")).run();
+            ClientMain.getSingleton().switchToGameState(metadata, teamJoinParam.equals("BLACK"));
         }catch (InvalidGameIdException e) {
             System.out.println(e.getMessage());
         }
@@ -117,7 +116,7 @@ public class ClientPostLogin {
         // Currently doesn't communicate to server, just displays the game UI
         try {
             GameMetadata metadata = getGameFromUser();
-            new ChessUIMain(false).run();
+            ClientMain.getSingleton().switchToGameState(metadata, false);
         }catch (InvalidGameIdException e) {
             System.out.println(e.getMessage());
         }

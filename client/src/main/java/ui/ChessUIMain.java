@@ -8,13 +8,9 @@ import ui.EscapeSequences;
 
 public class ChessUIMain {
     boolean viewFromBlackTeam;
-    ChessGame currentGame;
 
     public ChessUIMain(boolean viewFromBlackTeam) {
         this.viewFromBlackTeam = viewFromBlackTeam;
-
-        // Temporary
-        currentGame = new ChessGame();
     }
 
     private String pieceToString(ChessPiece piece) {
@@ -59,7 +55,7 @@ public class ChessUIMain {
         System.out.print(EscapeSequences.RESET_TEXT_COLOR+EscapeSequences.RESET_BG_COLOR+"\n");
     }
 
-    void drawBoard() {
+    public void drawBoard(ChessGame game) {
         System.out.print(EscapeSequences.ERASE_SCREEN);
         printHeaderRow();
         for (int r = 0; r < 8; r++) {
@@ -68,7 +64,7 @@ public class ChessUIMain {
             for (int c = 0; c < 8; c++) {
                 String bgColor = (r+c) % 2 == 0 ? BG_WHITE : BG_BLACK;
                 ChessPosition pos = viewFromBlackTeam ? new ChessPosition(chessRow,8-c) : new ChessPosition(chessRow,c+1) ;
-                ChessPiece piece = currentGame.getBoard().getPiece(pos);
+                ChessPiece piece = game.getBoard().getPiece(pos);
                 System.out.print(bgColor);
                 if (piece == null) {
                     System.out.print(TEXT_EMPTY);
@@ -81,17 +77,5 @@ public class ChessUIMain {
             System.out.print(BG_MAIN+TEXT_MAIN+" "+chessRow+" "+EscapeSequences.RESET_BG_COLOR+"\n");
         }
         printHeaderRow();
-    }
-
-    public void run() {
-        boolean exitUI = false;
-        while (!exitUI) {
-            drawBoard();
-            System.out.print("> ");
-            String c = ClientMain.getSingleton().scanner.nextLine().trim().toLowerCase();
-            if (c.equals("quit")) {
-                exitUI = true;
-            }
-        }
     }
 }

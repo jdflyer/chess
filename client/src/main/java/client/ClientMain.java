@@ -1,6 +1,7 @@
 package client;
 
 import model.AuthData;
+import model.GameMetadata;
 import serverfacade.ServerFacade;
 import serverfacade.ServerFacadeInterface;
 
@@ -13,15 +14,37 @@ public class ClientMain {
     public enum State {
         LOGGED_OUT,
         LOGGED_IN,
+        GAME,
         QUIT
     };
 
-    public State state;
+    private State state;
     public Scanner scanner;
     public ServerFacadeInterface facade;
     public AuthData authData;
     ClientPreLogin clientPreLogin;
     ClientPostLogin clientPostLogin;
+    ClientGame clientGame;
+
+    public State getState() { return state; }
+
+    public void switchToLoggedOutState() {
+        state = State.LOGGED_OUT;
+        authData = null;
+    }
+
+    public void switchToLoggedInState() {
+        state = State.LOGGED_IN;
+    }
+
+    public void switchToGameState(GameMetadata metadata, boolean viewFromBlackTeam) {
+        state = State.GAME;
+        clientGame.initGame(metadata, viewFromBlackTeam);
+    }
+
+    public void switchToQuitState() {
+        state = State.QUIT;
+    }
 
     ClientMain() {
         state = State.LOGGED_OUT;
@@ -30,16 +53,18 @@ public class ClientMain {
         facade = new ServerFacade("localhost",8080);
         clientPreLogin = new ClientPreLogin();
         clientPostLogin = new ClientPostLogin();
+        clientGame = new ClientGame();
     }
 
     void run() {
         System.out.println("Welcome to Chess! Type Help for a list of available commands");
-        while (state != State.QUIT) {
-            System.out.print("["+state.toString()+"]> ");
+        while (getState() != State.QUIT) {
+            System.out.print("["+getState().toString()+"]> ");
             String input = scanner.nextLine();
-            switch (state) {
+            switch (getState()) {
                 case LOGGED_OUT -> clientPreLogin.preLoginMain(input);
                 case LOGGED_IN -> clientPostLogin.postLoginMain(input);
+                case GAME -> clientGame.gameMain(input);
             }
         }
     }
