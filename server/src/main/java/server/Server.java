@@ -3,10 +3,7 @@ package server;
 import dataaccess.DataAccessException;
 import dataaccess.DatabaseManager;
 import dataaccess.sqldao.SQLDatabaseDAO;
-import handler.DatabaseHandler;
-import handler.GameHandler;
-import handler.SessionHandler;
-import handler.RegisterHandler;
+import handler.*;
 import io.javalin.*;
 
 public class Server {
@@ -32,6 +29,7 @@ public class Server {
         javalin.get("/game", context -> new GameHandler(context).handleListGames());
         javalin.post("/game", context -> new GameHandler(context).handleCreateGame());
         javalin.put("/game", context -> new GameHandler(context).handleJoinGame());
+        javalin.ws("/ws", wsConfig -> new WebsocketHandler(wsConfig).handleWebsocketconfig());
     }
 
     public int run(int desiredPort) {
