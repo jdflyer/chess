@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import model.GameCreateParams;
 import model.GameJoinParams;
 import model.GameList;
@@ -106,7 +107,8 @@ public class ClientPostLogin {
                     return;
             }
             ClientMain.getSingleton().facade.joinGame(new GameJoinParams(teamJoinParam,metadata.gameID()));
-            ClientMain.getSingleton().switchToGameState(metadata, teamJoinParam.equals("BLACK"));
+            ClientMain.getSingleton().switchToGameState(metadata,
+                    teamJoinParam.equals("BLACK") ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
         }catch (InvalidGameIdException e) {
             System.out.println(e.getMessage());
         }
@@ -116,7 +118,7 @@ public class ClientPostLogin {
         // Currently doesn't communicate to server, just displays the game UI
         try {
             GameMetadata metadata = getGameFromUser();
-            ClientMain.getSingleton().switchToGameState(metadata, false);
+            ClientMain.getSingleton().switchToGameState(metadata, ChessGame.TeamColor.WHITE);
         }catch (InvalidGameIdException e) {
             System.out.println(e.getMessage());
         }

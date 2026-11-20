@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import model.AuthData;
 import model.GameMetadata;
 import serverfacade.ServerFacade;
@@ -37,9 +38,9 @@ public class ClientMain {
         state = State.LOGGED_IN;
     }
 
-    public void switchToGameState(GameMetadata metadata, boolean viewFromBlackTeam) {
+    public void switchToGameState(GameMetadata metadata, ChessGame.TeamColor team) {
         state = State.GAME;
-        clientGame.initGame(metadata, viewFromBlackTeam);
+        clientGame.initGame(metadata, team);
     }
 
     public void switchToQuitState() {
