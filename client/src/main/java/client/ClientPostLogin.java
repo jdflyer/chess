@@ -31,9 +31,10 @@ public class ClientPostLogin {
             }
             int currentGame = 1;
             for (var game : gameList.games()) {
-                int playerCount = game.blackUsername() == null ? 0 : 1;
-                playerCount += game.whiteUsername() == null ? 0 : 1;
-                System.out.println("["+currentGame+"] "+game.gameName()+" ("+playerCount+"/2 Players)");
+                String blackUsername = game.blackUsername() == null ? "None" : game.blackUsername();
+                String whiteUsername = game.whiteUsername() == null ? "None" : game.whiteUsername();
+                System.out.println("["+currentGame+"] "+
+                        game.gameName()+" ("+whiteUsername+" on white, "+blackUsername+" on black)");
                 currentGame += 1;
             }
         }catch (InvalidSessionException e) {
