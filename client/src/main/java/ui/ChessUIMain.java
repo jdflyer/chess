@@ -1,6 +1,7 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
 import client.ClientMain;
@@ -35,9 +36,13 @@ public class ChessUIMain {
         }
     }
 
-    private static final String BG_MAIN = EscapeSequences.SET_BG_COLOR_DARK_GREEN;
+    private static final String BG_MAIN = EscapeSequences.SET_BG_COLOR_MAGENTA;
     private static final String BG_BLACK = EscapeSequences.SET_BG_COLOR_DARK_GREY;
     private static final String BG_WHITE = EscapeSequences.SET_BG_COLOR_LIGHT_GREY;
+
+    private static final String BG_BLACK_HIGHLIGHT = EscapeSequences.SET_BG_COLOR_DARK_GREEN;
+    private static final String BG_WHITE_HIGHLIGHT = EscapeSequences.SET_BG_COLOR_GREEN;
+    private static final String BG_HIGHLIGHTED_PIECE = EscapeSequences.SET_BG_COLOR_YELLOW;
 
     private static final String TEXT_WHITE = EscapeSequences.SET_TEXT_COLOR_WHITE;
     private static final String TEXT_BLACK = EscapeSequences.SET_TEXT_COLOR_BLACK;
@@ -56,6 +61,10 @@ public class ChessUIMain {
     }
 
     public void drawBoard(ChessGame game) {
+        drawHighlightedMoves(game, null);
+    }
+
+    public void drawHighlightedMoves(ChessGame game, ChessPosition pieceToHighlight) {
         System.out.print(EscapeSequences.ERASE_SCREEN);
         printHeaderRow();
         for (int r = 0; r < 8; r++) {
@@ -65,6 +74,13 @@ public class ChessUIMain {
                 String bgColor = (r+c) % 2 == 0 ? BG_WHITE : BG_BLACK;
                 ChessPosition pos = viewFromBlackTeam ? new ChessPosition(chessRow,8-c) : new ChessPosition(chessRow,c+1) ;
                 ChessPiece piece = game.getBoard().getPiece(pos);
+                if (pieceToHighlight != null) {
+                    if (pos.equals(pieceToHighlight)) {
+                        bgColor = BG_HIGHLIGHTED_PIECE;
+                    }else if (game.isValidMove(new ChessMove(pieceToHighlight, pos, null))) {
+                        bgColor = bgColor.equals(BG_WHITE) ? BG_WHITE_HIGHLIGHT : BG_BLACK_HIGHLIGHT;
+                    }
+                }
                 System.out.print(bgColor);
                 if (piece == null) {
                     System.out.print(TEXT_EMPTY);

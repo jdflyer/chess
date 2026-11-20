@@ -7,8 +7,6 @@ import chess.ChessPosition;
 import model.GameMetadata;
 import ui.ChessUIMain;
 
-import java.util.Locale;
-
 public class ClientGame {
     ChessGame game;
     ChessGame.TeamColor team;
@@ -35,24 +33,39 @@ public class ClientGame {
         return new ChessPosition(row,col);
     }
 
-    void handleMove() {
-        System.out.print("Which piece would you like to move (eg. A5): ");
-        String pieceString = ClientMain.getSingleton().scanner.nextLine().trim().toLowerCase();
+    private ChessPosition getPiecePos(String pieceString) {
         ChessPosition piecePos = stringToChessPosition(pieceString);
         if (piecePos == null) {
             System.out.println("Invalid position!");
-            return;
+            return null;
         }
-        ChessPiece piece = game.getBoard().getPiece(piecePos);
+        return piecePos;
+    }
+
+    private  ChessPiece getPiece(ChessPosition pos) {
+        ChessPiece piece = game.getBoard().getPiece(pos);
         if (piece == null || piece.getTeamColor() != team) {
             System.out.println("Invalid piece! (Select a piece that is on your team)");
+            return null;
+        }
+        return piece;
+    }
+
+    void handleMove() {
+        System.out.print("Which piece would you like to move (eg. A5): ");
+        String pieceString = ClientMain.getSingleton().scanner.nextLine().trim().toLowerCase();
+        ChessPosition piecePos = getPiecePos(pieceString);
+        if (piecePos == null) {
+            return;
+        }
+        ChessPiece piece = getPiece(piecePos);
+        if (piece == null) {
             return;
         }
         System.out.print("Where would you like to move the piece to: ");
         String moveString = ClientMain.getSingleton().scanner.nextLine().trim().toLowerCase();
-        ChessPosition movePos = stringToChessPosition(moveString);
+        ChessPosition movePos = getPiecePos(moveString);
         if (movePos == null) {
-            System.out.println("Invalid position!");
             return;
         }
 
@@ -97,7 +110,30 @@ public class ClientGame {
             }
         }
 
+        // Todo: Send move command
+    }
 
+    void handleResign() {
+        System.out.print("Are you sure you would like to resign? (y/n): ");
+        String answer = ClientMain.getSingleton().scanner.nextLine().trim().toLowerCase();
+        if (answer.equals("y") || answer.equals("yes")) {
+            // Handle resign (don't leave the game)
+        }
+    }
+
+    void handleHighlight() {
+        System.out.print("Which piece would you like to see valid moves for? (eg. A5): ");
+        String pieceString = ClientMain.getSingleton().scanner.nextLine().trim().toLowerCase();
+        ChessPosition piecePos = getPiecePos(pieceString);
+        if (piecePos == null) {
+            return;
+        }
+        ChessPiece piece = getPiece(piecePos);
+        if (piece == null) {
+            return;
+        }
+
+        ui.drawHighlightedMoves(game, piecePos);
     }
 
     void gameMain(String input) {
@@ -107,7 +143,10 @@ public class ClientGame {
                 System.out.println("""
                         Chess Game Help:
                         \thelp: list available commands
-                        \tleave: leave the current game""");
+                        \tleave: leave the current game
+                        \tmove: move a piece
+                        \tresign: resign from the game
+                        \thighlight: highlight all legal moves for a piece""");
                 break;
             case "redraw":
                 ui.drawBoard(game);
@@ -117,6 +156,12 @@ public class ClientGame {
                 break;
             case "move":
                 handleMove();
+                break;
+            case "resign":
+                handleResign();
+                break;
+            case "highlight":
+                handleHighlight();
                 break;
             default:
                 System.out.println("Unrecognized command. Type help for a list of commands.");
