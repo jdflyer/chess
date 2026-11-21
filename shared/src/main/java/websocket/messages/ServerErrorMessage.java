@@ -5,8 +5,8 @@ import java.util.Objects;
 public class ServerErrorMessage extends ServerMessage {
     String errorMessage;
 
-    public ServerErrorMessage(ServerMessageType type, String errorMessage) {
-        super(type);
+    public ServerErrorMessage(String errorMessage) {
+        super(ServerMessageType.ERROR);
         this.errorMessage = errorMessage;
     }
 
