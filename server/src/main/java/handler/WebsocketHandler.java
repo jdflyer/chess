@@ -1,6 +1,7 @@
 package handler;
 
 import chess.ChessGame;
+import chess.ChessPosition;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.InvalidAuthTokenException;
@@ -85,6 +86,8 @@ public class WebsocketHandler {
         });
     }
 
+    private record UsernameData(String whiteUsername, String blackUsername) {}
+
     void handleMessage(WsMessageContext ctx) {
         try {
             UserGameCommand command = Handler.deserialize(UserGameCommand.class, ctx.message());
@@ -97,16 +100,17 @@ public class WebsocketHandler {
             AuthData playerAuth = sessionService.getAuthData(command.getAuthToken());
 
             ChessGame chessGame = game.game();
+            UsernameData usernameData = new UsernameData(game.whiteUsername(), game.blackUsername());
             
             switch (command.getCommandType()) {
                 case CONNECT -> handleConnect(ctx, command, game, playerAuth);
-                case LEAVE -> handleLeave(ctx, command, game, playerAuth);
-                case RESIGN -> handleResign(ctx, command, game, playerAuth);
+                case LEAVE -> usernameData = handleLeave(ctx, command, game, playerAuth, usernameData);
+                case RESIGN -> handleResign(ctx, command, game, playerAuth, chessGame);
                 case MAKE_MOVE -> handleMove(ctx, command, game, playerAuth, chessGame);
                 default -> sendError(ctx, "Invalid command type!");
             }
 
-            gameService.gameDAO.updateGame(new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(),
+            gameService.gameDAO.updateGame(new GameData(game.gameID(), usernameData.whiteUsername(), usernameData.blackUsername(),
                     game.gameName(), chessGame));
         }catch (InvalidAuthTokenException e) {
             sendError(ctx, "Invalid session!");
@@ -116,6 +120,11 @@ public class WebsocketHandler {
         } catch (Exception e) {
             sendError(ctx, "Error parsing message on server!");
         }
+    }
+
+    String getPositionString(ChessPosition position) {
+        char col = (char)('a'+position.getColumn()-1);
+        return Character.toString(col) + position.getRow();
     }
 
     private void handleMove(WsMessageContext ctx, UserGameCommand command, GameData game, AuthData playerAuth, ChessGame chessGame) {
@@ -152,6 +161,10 @@ public class WebsocketHandler {
 
         sendLoadGameToAll(game.gameID(),chessGame);
 
+        String startString = getPositionString(moveCommand.getMove().getStartPosition());
+        String endString = getPositionString(moveCommand.getMove().getEndPosition());
+        sendNotificationToAllButOne(game.gameID(), playerAuth.username(), "move "+startString+endString);
+
         if (chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
             chessGame.setGameEnded(true);
             sendNotificationToAll(game.gameID(),"stalemate "+ game.blackUsername());
@@ -183,20 +196,29 @@ public class WebsocketHandler {
         }
     }
 
-    private void handleResign(WsMessageContext ctx, UserGameCommand command, GameData game, AuthData playerAuth) {
+    private void handleResign(WsMessageContext ctx, UserGameCommand command, GameData game, AuthData playerAuth, ChessGame chessGame) {
+        chessGame.setGameEnded(true);
+        sendNotificationToAll(game.gameID(), "resign "+playerAuth.username());
     }
 
-    private void handleLeave(WsMessageContext ctx, UserGameCommand command, GameData game, AuthData playerAuth) {
+    private UsernameData handleLeave(WsMessageContext ctx, UserGameCommand command, GameData game, AuthData playerAuth, UsernameData usernameData) {
         if (!gameIdToStringToWsContextMap.containsKey(game.gameID())) {
-            return;
+            return usernameData;
         }
         HashMap<String, WsContext> stringToContextMap = gameIdToStringToWsContextMap.get(game.gameID());
         if (!stringToContextMap.containsKey(playerAuth.username())) {
-            return;
+            return usernameData;
         }
         stringToContextMap.remove(playerAuth.username());
 
         sendNotificationToAll(game.gameID(), "leave "+playerAuth.username());
+
+        if (playerAuth.username().equals(game.blackUsername())) {
+            return new UsernameData(usernameData.whiteUsername(), null);
+        }else if (playerAuth.username().equals(game.whiteUsername())) {
+            return new UsernameData(null, usernameData.blackUsername());
+        }
+        return usernameData;
     }
 
     private void handleConnect(WsMessageContext ctx, UserGameCommand command, GameData game, AuthData playerAuth) {
