@@ -115,10 +115,9 @@ public class ClientPostLogin {
     }
 
     void observeGame() {
-        // Currently doesn't communicate to server, just displays the game UI
         try {
             GameMetadata metadata = getGameFromUser();
-            ClientMain.getSingleton().switchToGameState(metadata, ChessGame.TeamColor.WHITE);
+            ClientMain.getSingleton().switchToGameState(metadata, null);
         }catch (InvalidGameIdException e) {
             System.out.println(e.getMessage());
         }

@@ -12,6 +12,8 @@ public class ChessGame {
     ChessBoard board;
     TeamColor currentTurn;
 
+    boolean gameEnded;
+
     // Helper class that keeps track of castle related pieces per-team
     private static class CastleStatus {
         boolean leftRookMoved;
@@ -31,11 +33,20 @@ public class ChessGame {
         board = new ChessBoard();
         board.resetBoard();
         currentTurn = TeamColor.WHITE;
+        gameEnded = false;
 
         canCastleTeams = new CastleStatus[TeamColor.values().length];
         for (int i = 0; i < canCastleTeams.length; i++) {
             canCastleTeams[i] = new CastleStatus(false, false, false);
         }
+    }
+
+    public boolean getGameEnded() {
+        return gameEnded;
+    }
+
+    public void setGameEnded(boolean gameEnded) {
+        this.gameEnded = gameEnded;
     }
 
     /**

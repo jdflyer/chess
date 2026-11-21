@@ -14,12 +14,18 @@ import websocket.messages.NotificationMessage;
 import websocket.messages.ServerErrorMessage;
 import websocket.messages.ServerMessage;
 
+import javax.sound.midi.SysexMessage;
+
 public class ClientGame implements ServerMessageObserverInterface {
     final Object gameLock = new Object();
     ChessGame game;
 
     ChessGame.TeamColor team;
-    GameMetadata metadata;
+
+    int gameId;
+    String blackUsername;
+    String whiteUsername;
+
     ChessUIMain ui;
 
     boolean waitForNewGameState(int timeoutMs) {
@@ -35,22 +41,24 @@ public class ClientGame implements ServerMessageObserverInterface {
         }
     }
 
-    void setGameState(ChessGame game) {
+    void setAndShowGameState(ChessGame game) {
         synchronized (gameLock) {
             this.game = game;
+            ui.drawBoard(game);
             gameLock.notifyAll();
         }
     }
 
     void initGame(GameMetadata metadata, ChessGame.TeamColor team) {
-        this.metadata = metadata;
+        this.gameId = metadata.gameID();
+        this.whiteUsername = metadata.whiteUsername();
+        this.blackUsername = metadata.blackUsername();
         this.team = team;
         ui = new ChessUIMain(team == ChessGame.TeamColor.BLACK);
 
         ClientMain.getSingleton().facade.connectToGame(metadata.gameID(), this);
 
         waitForNewGameState(5000);
-        ui.drawBoard(game);
     }
 
     ChessPosition stringToChessPosition(String position) {
@@ -76,7 +84,7 @@ public class ClientGame implements ServerMessageObserverInterface {
 
     private  ChessPiece getPiece(ChessPosition pos) {
         ChessPiece piece = game.getBoard().getPiece(pos);
-        if (piece == null || piece.getTeamColor() != team) {
+        if (piece == null) {
             System.out.println("Invalid piece! (Select a piece that is on your team)");
             return null;
         }
@@ -84,6 +92,10 @@ public class ClientGame implements ServerMessageObserverInterface {
     }
 
     void handleMove() {
+        if (game.getTeamTurn() != team) {
+            System.out.println("Can't move: It isn't your turn yet!");
+            return;
+        }
         System.out.print("Which piece would you like to move (eg. A5): ");
         String pieceString = ClientMain.getSingleton().scanner.nextLine().trim().toLowerCase();
         ChessPosition piecePos = getPiecePos(pieceString);
@@ -204,21 +216,83 @@ public class ClientGame implements ServerMessageObserverInterface {
     }
 
     void notifyNotification(NotificationMessage notification) {
-
+        String[] fullMessage = notification.getMessage().split("\n");
+        if (fullMessage.length== 0) {
+            return;
+        }
+        System.out.print("Notification: ");
+        switch (fullMessage[0]) {
+            case "join":
+                if (fullMessage.length != 3) {
+                    break;
+                }
+                String teamString = "as an observer";
+                if (fullMessage[2].equals("black")) {
+                    teamString = "the black team";
+                    blackUsername = fullMessage[1];
+                }else if (fullMessage[2].equals("white")) {
+                    teamString = "the white team";
+                    whiteUsername = fullMessage[1];
+                }
+                System.out.println(fullMessage[1]+" has joined "+teamString);
+                break;
+            case "move":
+                if (fullMessage.length != 3) {
+                    break;
+                }
+                // We should already have the updated board here: Read the new end position to determine
+                // which team and player made the move
+                ChessPosition endPos = stringToChessPosition(fullMessage[2]);
+                if (endPos == null) {
+                    break;
+                }
+                ChessPiece pieceMoved = game.getBoard().getPiece(endPos);
+                String otherTeam = pieceMoved.getTeamColor() == ChessGame.TeamColor.BLACK ? "black" : "white";
+                String playerMoved = pieceMoved.getTeamColor() == ChessGame.TeamColor.BLACK ? blackUsername : whiteUsername;
+                System.out.println(playerMoved+" their "+otherTeam+" "+pieceMoved.getPieceType()+" from "+fullMessage[1]+
+                        " to "+fullMessage[2]);
+                break;
+            case "resign":
+                if (fullMessage.length != 2) {
+                    break;
+                }
+                System.out.println(fullMessage[1]+" has resigned from the game.");
+                break;
+            case "leave":
+                if (fullMessage.length != 2) {
+                    break;
+                }
+                System.out.println(fullMessage[1]+" has left the game.");
+                break;
+            case "check":
+                if (fullMessage.length != 2) {
+                    break;
+                }
+                System.out.println(fullMessage[1]+" is in check.");
+                break;
+            case "checkmate":
+                if (fullMessage.length != 2) {
+                    break;
+                }
+                System.out.println(fullMessage[1]+" is in checkmate. The game has ended.");
+                break;
+        }
     }
 
     void notifyError(ServerErrorMessage error) {
-
+        System.out.println("Error From Server: "+error);
     }
 
     void notifyLoadGame(LoadGameMessage message) {
-        setGameState(message.getGame());
+        setAndShowGameState(message.getGame());
     }
 
     @Override
     public void notifyMessage(String message) {
         try {
             ServerMessage serverMessage = ServerFacade.deserializeRecord(message, ServerMessage.class);
+            System.out.print('\n');
+            ClientMain.getSingleton().scanner.nextLine();
             switch (serverMessage.getServerMessageType()) {
                 case NOTIFICATION:
                     notifyNotification(ServerFacade.deserializeRecord(message, NotificationMessage.class));
@@ -230,6 +304,9 @@ public class ClientGame implements ServerMessageObserverInterface {
                     notifyLoadGame(ServerFacade.deserializeRecord(message, LoadGameMessage.class));
                     break;
             }
+
+            // Clear current scanner input
+            System.out.print("[GAME]> ");
         }catch (JsonSyntaxException e) {
             // Invalid message was sent, don't handle it
             return;
