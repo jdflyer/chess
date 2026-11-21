@@ -124,15 +124,15 @@ public class WebsocketHandler {
 
         sendLoadGame(ctx, game.game());
 
-        String playerTeam = "an Observer";
+        String playerTeam = "observer";
         if (game.blackUsername().equals(playerAuth.username())) {
-            playerTeam = "Black team";
+            playerTeam = "black";
         }else if (game.whiteUsername().equals(playerAuth.username())) {
-            playerTeam = "White team";
+            playerTeam = "white";
         }
 
         sendNotificationToAllButOne(game.gameID(), playerAuth.username(),
-                playerAuth.username()+" has joined the game as "+playerTeam);
+                "join "+playerAuth.username()+" "+playerTeam);
     }
 
     public void handleWebsocketconfig() {

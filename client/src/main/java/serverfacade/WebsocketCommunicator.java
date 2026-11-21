@@ -14,11 +14,12 @@ public class WebsocketCommunicator extends Endpoint {
 
     public Session session;
 
-    int gameId; // The game ID to use in all requests
+    ServerMessageObserverInterface observer;
 
-    public WebsocketCommunicator(String address, int port) {
+    public WebsocketCommunicator(String address, int port, ServerMessageObserverInterface observer) {
         this.address = address;
         this.port = port;
+        this.observer = observer;
     }
 
     public void connect() throws Exception {

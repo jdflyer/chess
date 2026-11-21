@@ -25,11 +25,11 @@ public class ServerFacade implements ServerFacadeInterface {
     // Saved during ws connect, used for subsequent requests
     int gameId;
 
-    private String serialize(Object objectToSerialize) {
+    public static String serialize(Object objectToSerialize) {
         return new Gson().toJson(objectToSerialize);
     }
 
-    private <T> T deserializeRecord(String json, Class<T> recordOfT) throws JsonSyntaxException {
+    public static <T> T deserializeRecord(String json, Class<T> recordOfT) throws JsonSyntaxException {
         T record = new Gson().fromJson(json, recordOfT);
         if (recordOfT.isRecord()) {
             for (RecordComponent component : recordOfT.getRecordComponents()) {
@@ -141,7 +141,7 @@ public class ServerFacade implements ServerFacadeInterface {
     public void connectToGame(int gameId) throws BadRequestException {
         this.gameId = gameId;
         try {
-            this.ws = new WebsocketCommunicator(serverAddress, serverPort);
+            this.ws = new WebsocketCommunicator(serverAddress, serverPort, new ServerMessageObserver());
             ws.connect();
             UserGameCommand command = new UserGameCommand(
                     UserGameCommand.CommandType.CONNECT, ClientMain.getSingleton().authData.authToken(), gameId);
