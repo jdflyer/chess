@@ -1,5 +1,6 @@
 package serverfacade;
 
+import chess.ChessMove;
 import model.*;
 
 public interface ServerFacadeInterface {
@@ -14,4 +15,6 @@ public interface ServerFacadeInterface {
     public void joinGame(GameJoinParams joinParams) throws BadRequestException, InvalidSessionException;
 
     public void connectToGame(int gameId, ServerMessageObserverInterface observer) throws BadRequestException;
+
+    public void makeMove(ChessMove move) throws BadRequestException;
 }

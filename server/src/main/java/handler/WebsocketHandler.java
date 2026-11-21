@@ -1,6 +1,7 @@
 package handler;
 
 import chess.ChessGame;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.InvalidAuthTokenException;
 import dataaccess.InvalidGameException;
@@ -14,6 +15,7 @@ import model.GameMetadata;
 import service.SessionService;
 import service.gameservice.GameService;
 import websocket.commands.UserGameCommand;
+import websocket.commands.UserMoveCommand;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import websocket.messages.ServerErrorMessage;
@@ -39,9 +41,18 @@ public class WebsocketHandler {
         ctx.send(createErrorMessage(createErrorMessage(errorString)));
     }
 
-    void sendLoadGame(WsMessageContext ctx, ChessGame game) {
+    void sendLoadGame(WsContext ctx, ChessGame game) {
         LoadGameMessage message = new LoadGameMessage(game);
         ctx.send(new Gson().toJson(message));
+    }
+
+    void sendLoadGameToAll(int gameId, ChessGame game) {
+        if (!gameIdToStringToWsContextMap.containsKey(gameId)) {
+            return;
+        }
+        gameIdToStringToWsContextMap.get(gameId).forEach((username,context) -> {
+            sendLoadGame(context, game);
+        });
     }
 
     void sendNotification(WsContext ctx, String message) {
@@ -79,24 +90,24 @@ public class WebsocketHandler {
             UserGameCommand command = Handler.deserialize(UserGameCommand.class, ctx.message());
             
             int gameId = command.getGameID();
-            GameData game = new GameService().getGameById(gameId);
+            GameService gameService = new GameService();
+            GameData game = gameService.getGameById(gameId);
 
             SessionService sessionService = new SessionService();
             AuthData playerAuth = sessionService.getAuthData(command.getAuthToken());
-            
-            // Move to move commands
-//            if (!playerAuth.username().equals(game.whiteUsername()) && !playerAuth.username().equals(game.blackUsername())) {
-//                sendError(ctx, "Player does not have correct auth to send a command to this game!");
-//                return;
-//            }
+
+            ChessGame chessGame = game.game();
             
             switch (command.getCommandType()) {
                 case CONNECT -> handleConnect(ctx, command, game, playerAuth);
                 case LEAVE -> handleLeave(ctx, command, game, playerAuth);
                 case RESIGN -> handleResign(ctx, command, game, playerAuth);
-                case MAKE_MOVE -> handleMove(ctx, command, game, playerAuth);
+                case MAKE_MOVE -> handleMove(ctx, command, game, playerAuth, chessGame);
                 default -> sendError(ctx, "Invalid command type!");
             }
+
+            gameService.gameDAO.updateGame(new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(),
+                    game.gameName(), chessGame));
         }catch (InvalidAuthTokenException e) {
             sendError(ctx, "Invalid session!");
         }
@@ -107,7 +118,69 @@ public class WebsocketHandler {
         }
     }
 
-    private void handleMove(WsMessageContext ctx, UserGameCommand command, GameData game, AuthData playerAuth) {
+    private void handleMove(WsMessageContext ctx, UserGameCommand command, GameData game, AuthData playerAuth, ChessGame chessGame) {
+        if (chessGame.getGameEnded()) {
+            sendError(ctx, "Can't move! The game has already ended!");
+            return;
+        }
+
+        UserMoveCommand moveCommand = Handler.deserialize(UserMoveCommand.class, ctx.message());
+        if (moveCommand.getMove() == null) {
+            sendError(ctx, "Can't move! Invalid move sent to server!");
+            return;
+        }
+        String username = playerAuth.username();
+        if (!username.equals(game.whiteUsername()) && !username.equals(game.blackUsername())) {
+            sendError(ctx, "Can't move! Player isn't in the game!");
+            return;
+        }
+        if (username.equals(game.whiteUsername()) && chessGame.getTeamTurn() == ChessGame.TeamColor.BLACK) {
+            sendError(ctx, "Can't move! It isn't white team's turn!");
+            return;
+        }
+        if (username.equals(game.blackUsername()) && chessGame.getTeamTurn() == ChessGame.TeamColor.WHITE) {
+            sendError(ctx, "Can't move! It isn't black team's turn!");
+            return;
+        }
+
+        try {
+            chessGame.makeMove(moveCommand.getMove());
+        }catch (InvalidMoveException e) {
+            sendError(ctx, "The requested move is invalid!");
+            return;
+        }
+
+        sendLoadGameToAll(game.gameID(),chessGame);
+
+        if (chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
+            chessGame.setGameEnded(true);
+            sendNotificationToAll(game.gameID(),"stalemate "+ game.blackUsername());
+            return;
+        }
+        if (chessGame.isInStalemate(ChessGame.TeamColor.WHITE)) {
+            chessGame.setGameEnded(true);
+            sendNotificationToAll(game.gameID(),"stalemate "+ game.whiteUsername());
+            return;
+        }
+
+        if (chessGame.isInCheckmate(ChessGame.TeamColor.BLACK)) {
+            chessGame.setGameEnded(true);
+            sendNotificationToAll(game.gameID(),"checkmate "+ game.blackUsername());
+            return;
+        }
+        if (chessGame.isInCheckmate(ChessGame.TeamColor.WHITE)) {
+            chessGame.setGameEnded(true);
+            sendNotificationToAll(game.gameID(),"checkmate "+ game.whiteUsername());
+            return;
+        }
+
+        if (chessGame.isInCheck(ChessGame.TeamColor.BLACK)) {
+            sendNotificationToAll(game.gameID(),"check "+ game.blackUsername());
+            return;
+        }
+        if (chessGame.isInCheck(ChessGame.TeamColor.WHITE)) {
+            sendNotificationToAll(game.gameID(),"check "+ game.whiteUsername());
+        }
     }
 
     private void handleResign(WsMessageContext ctx, UserGameCommand command, GameData game, AuthData playerAuth) {

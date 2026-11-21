@@ -6,6 +6,7 @@ import chess.ChessPiece;
 import chess.ChessPosition;
 import com.google.gson.JsonSyntaxException;
 import model.GameMetadata;
+import serverfacade.BadRequestException;
 import serverfacade.ServerFacade;
 import serverfacade.ServerMessageObserverInterface;
 import ui.ChessUIMain;
@@ -92,8 +93,12 @@ public class ClientGame implements ServerMessageObserverInterface {
     }
 
     void handleMove() {
+        if (team == null) {
+            System.out.println("Can't move! You are an observer!");
+            return;
+        }
         if (game.getTeamTurn() != team) {
-            System.out.println("Can't move: It isn't your turn yet!");
+            System.out.println("Can't move! It isn't your turn yet!");
             return;
         }
         System.out.print("Which piece would you like to move (eg. A5): ");
@@ -154,7 +159,11 @@ public class ClientGame implements ServerMessageObserverInterface {
             }
         }
 
-        // Todo: Send move command
+        try {
+            ClientMain.getSingleton().facade.makeMove(move);
+        } catch (BadRequestException e) {
+            System.out.println("The move request failed!");
+        }
     }
 
     void handleResign() {
@@ -276,6 +285,12 @@ public class ClientGame implements ServerMessageObserverInterface {
                 }
                 System.out.println(fullMessage[1]+" is in checkmate. The game has ended.");
                 break;
+            case "stalemate":
+                if (fullMessage.length != 2) {
+                    break;
+                }
+                System.out.println(fullMessage[1]+" cannot make any more moves. The game has ended in a stalemate.");
+                break;
         }
     }
 
@@ -291,8 +306,9 @@ public class ClientGame implements ServerMessageObserverInterface {
     public void notifyMessage(String message) {
         try {
             ServerMessage serverMessage = ServerFacade.deserializeRecord(message, ServerMessage.class);
-            System.out.print('\n');
+            // Clear current scanner input
             ClientMain.getSingleton().scanner.nextLine();
+            System.out.print('\n');
             switch (serverMessage.getServerMessageType()) {
                 case NOTIFICATION:
                     notifyNotification(ServerFacade.deserializeRecord(message, NotificationMessage.class));
@@ -305,7 +321,6 @@ public class ClientGame implements ServerMessageObserverInterface {
                     break;
             }
 
-            // Clear current scanner input
             System.out.print("[GAME]> ");
         }catch (JsonSyntaxException e) {
             // Invalid message was sent, don't handle it

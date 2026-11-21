@@ -1,10 +1,12 @@
 package serverfacade;
 
+import chess.ChessMove;
 import client.ClientMain;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import model.*;
 import websocket.commands.UserGameCommand;
+import websocket.commands.UserMoveCommand;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.RecordComponent;
@@ -146,6 +148,15 @@ public class ServerFacade implements ServerFacadeInterface {
             UserGameCommand command = new UserGameCommand(
                     UserGameCommand.CommandType.CONNECT, ClientMain.getSingleton().authData.authToken(), gameId);
             ws.send(serialize(command));
+        }catch (Exception e) {
+            throw new BadRequestException("Bad request");
+        }
+    }
+
+    public void makeMove(ChessMove move) throws BadRequestException {
+        try {
+            UserMoveCommand moveCommand = new UserMoveCommand(ClientMain.getSingleton().authData.authToken(), gameId, move);
+            ws.send(serialize(moveCommand));
         }catch (Exception e) {
             throw new BadRequestException("Bad request");
         }
