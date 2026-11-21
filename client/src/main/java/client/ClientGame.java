@@ -15,20 +15,41 @@ import websocket.messages.ServerErrorMessage;
 import websocket.messages.ServerMessage;
 
 public class ClientGame implements ServerMessageObserverInterface {
+    final Object gameLock = new Object();
     ChessGame game;
+
     ChessGame.TeamColor team;
     GameMetadata metadata;
     ChessUIMain ui;
 
+    boolean waitForNewGameState(int timeoutMs) {
+        try {
+            synchronized (gameLock) {
+                while (game == null) {
+                    gameLock.wait(timeoutMs);
+                }
+            }
+            return true;
+        } catch(InterruptedException e) {
+            return false;
+        }
+    }
+
+    void setGameState(ChessGame game) {
+        synchronized (gameLock) {
+            this.game = game;
+            gameLock.notifyAll();
+        }
+    }
+
     void initGame(GameMetadata metadata, ChessGame.TeamColor team) {
         this.metadata = metadata;
         this.team = team;
+        ui = new ChessUIMain(team == ChessGame.TeamColor.BLACK);
 
         ClientMain.getSingleton().facade.connectToGame(metadata.gameID(), this);
-        // await LOAD_GAME message, serialize board from response
-        
-        game = new ChessGame();
-        ui = new ChessUIMain(team == ChessGame.TeamColor.BLACK);
+
+        waitForNewGameState(5000);
         ui.drawBoard(game);
     }
 
@@ -191,7 +212,7 @@ public class ClientGame implements ServerMessageObserverInterface {
     }
 
     void notifyLoadGame(LoadGameMessage message) {
-
+        setGameState(message.getGame());
     }
 
     @Override
