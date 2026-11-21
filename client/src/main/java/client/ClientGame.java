@@ -147,6 +147,7 @@ public class ClientGame {
                 System.out.println("""
                         Chess Game Help:
                         \thelp: list available commands
+                        \tredraw: redraw the chess board
                         \tleave: leave the current game
                         \tmove: move a piece
                         \tresign: resign from the game

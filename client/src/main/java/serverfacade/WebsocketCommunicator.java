@@ -27,7 +27,7 @@ public class WebsocketCommunicator extends Endpoint {
         this.session = container.connectToServer(this,uri);
         session.addMessageHandler(new MessageHandler.Whole<String>() {
             public void onMessage(String message) {
-                System.out.println("Message");
+                System.out.println(message);
             }
         });
     }

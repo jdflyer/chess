@@ -17,8 +17,8 @@ public abstract class Handler {
         this.ctx = ctx;
     }
 
-    protected <T> T getRequestData(Class<T> classOfT) throws JsonSyntaxException {
-        T record = new Gson().fromJson(ctx.body(), classOfT);
+    public static <T> T deserialize(Class<T> classOfT, String json) throws JsonSyntaxException {
+        T record = new Gson().fromJson(json, classOfT);
         if (classOfT.isRecord()) {
             for (RecordComponent component : classOfT.getRecordComponents()) {
                 try {
@@ -31,6 +31,10 @@ public abstract class Handler {
             }
         }
         return record;
+    }
+
+    protected <T> T getRequestData(Class<T> classOfT) throws JsonSyntaxException {
+        return deserialize(classOfT, ctx.body());
     }
 
     protected void setResponseJson(int statusCode, String json) {
