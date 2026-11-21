@@ -2,8 +2,6 @@ package serverfacade;
 
 import model.*;
 
-import java.util.Collection;
-
 public interface ServerFacadeInterface {
     public AuthData register(UserData userData) throws BadRequestException, UsernameTakenException;
     public AuthData login(LoginData loginData) throws InvalidUsernamePasswordException, BadRequestException;
@@ -14,4 +12,6 @@ public interface ServerFacadeInterface {
     public GameList listAllGames() throws BadRequestException, InvalidSessionException;
     public GameCreateResponse createGame(GameCreateParams gameCreateParams) throws BadRequestException, InvalidSessionException;
     public void joinGame(GameJoinParams joinParams) throws BadRequestException, InvalidSessionException;
+
+    public void connectToGame(int gameId) throws BadRequestException;
 }

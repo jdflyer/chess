@@ -17,9 +17,8 @@ public class ClientGame {
         this.metadata = metadata;
         this.team = team;
 
-        // Open connection on /ws
-        // Send CONNECT message
-        // send LOAD_GAME message, serialize board from response
+        ClientMain.getSingleton().facade.connectToGame(metadata.gameID());
+        // await LOAD_GAME message, serialize board from response
         
         game = new ChessGame();
         ui = new ChessUIMain(team == ChessGame.TeamColor.BLACK);

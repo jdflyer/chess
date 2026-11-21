@@ -4,6 +4,7 @@ import client.ClientMain;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import model.*;
+import websocket.commands.UserGameCommand;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.RecordComponent;
@@ -19,6 +20,10 @@ public class ServerFacade implements ServerFacadeInterface {
     final String serverAddress;
     final int serverPort;
     HttpCommunicator http;
+    WebsocketCommunicator ws;
+
+    // Saved during ws connect, used for subsequent requests
+    int gameId;
 
     private String serialize(Object objectToSerialize) {
         return new Gson().toJson(objectToSerialize);
@@ -128,6 +133,19 @@ public class ServerFacade implements ServerFacadeInterface {
             }
         }catch (InvalidSessionException e) {
             throw e;
+        }catch (Exception e) {
+            throw new BadRequestException("Bad request");
+        }
+    }
+
+    public void connectToGame(int gameId) throws BadRequestException {
+        this.gameId = gameId;
+        try {
+            this.ws = new WebsocketCommunicator(serverAddress, serverPort);
+            ws.connect();
+            UserGameCommand command = new UserGameCommand(
+                    UserGameCommand.CommandType.CONNECT, ClientMain.getSingleton().authData.authToken(), gameId);
+            ws.send(serialize(command));
         }catch (Exception e) {
             throw new BadRequestException("Bad request");
         }
