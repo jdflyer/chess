@@ -4,10 +4,17 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import com.google.gson.JsonSyntaxException;
 import model.GameMetadata;
+import serverfacade.ServerFacade;
+import serverfacade.ServerMessageObserverInterface;
 import ui.ChessUIMain;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
+import websocket.messages.ServerErrorMessage;
+import websocket.messages.ServerMessage;
 
-public class ClientGame {
+public class ClientGame implements ServerMessageObserverInterface {
     ChessGame game;
     ChessGame.TeamColor team;
     GameMetadata metadata;
@@ -17,7 +24,7 @@ public class ClientGame {
         this.metadata = metadata;
         this.team = team;
 
-        ClientMain.getSingleton().facade.connectToGame(metadata.gameID());
+        ClientMain.getSingleton().facade.connectToGame(metadata.gameID(), this);
         // await LOAD_GAME message, serialize board from response
         
         game = new ChessGame();
@@ -173,5 +180,38 @@ public class ClientGame {
                 break;
         }
 //        ui.drawBoard(game);
+    }
+
+    void notifyNotification(NotificationMessage notification) {
+
+    }
+
+    void notifyError(ServerErrorMessage error) {
+
+    }
+
+    void notifyLoadGame(LoadGameMessage message) {
+
+    }
+
+    @Override
+    public void notifyMessage(String message) {
+        try {
+            ServerMessage serverMessage = ServerFacade.deserializeRecord(message, ServerMessage.class);
+            switch (serverMessage.getServerMessageType()) {
+                case NOTIFICATION:
+                    notifyNotification(ServerFacade.deserializeRecord(message, NotificationMessage.class));
+                    break;
+                case ERROR:
+                    notifyError(ServerFacade.deserializeRecord(message, ServerErrorMessage.class));
+                    break;
+                case LOAD_GAME:
+                    notifyLoadGame(ServerFacade.deserializeRecord(message, LoadGameMessage.class));
+                    break;
+            }
+        }catch (JsonSyntaxException e) {
+            // Invalid message was sent, don't handle it
+            return;
+        }
     }
 }

@@ -1,7 +1,7 @@
 package serverfacade;
 
-import websocket.messages.NotificationMessage;
+import websocket.messages.ServerMessage;
 
 public interface ServerMessageObserverInterface {
-    void notifyMessage(NotificationMessage message);
+    void notifyMessage(String message);
 }

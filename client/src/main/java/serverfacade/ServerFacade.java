@@ -138,10 +138,10 @@ public class ServerFacade implements ServerFacadeInterface {
         }
     }
 
-    public void connectToGame(int gameId) throws BadRequestException {
+    public void connectToGame(int gameId, ServerMessageObserverInterface observer) throws BadRequestException {
         this.gameId = gameId;
         try {
-            this.ws = new WebsocketCommunicator(serverAddress, serverPort, new ServerMessageObserver());
+            this.ws = new WebsocketCommunicator(serverAddress, serverPort, observer);
             ws.connect();
             UserGameCommand command = new UserGameCommand(
                     UserGameCommand.CommandType.CONNECT, ClientMain.getSingleton().authData.authToken(), gameId);

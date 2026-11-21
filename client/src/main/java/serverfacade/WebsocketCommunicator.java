@@ -4,6 +4,7 @@ package serverfacade;
 import client.ClientMain;
 import jakarta.websocket.*;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,7 +29,7 @@ public class WebsocketCommunicator extends Endpoint {
         this.session = container.connectToServer(this,uri);
         session.addMessageHandler(new MessageHandler.Whole<String>() {
             public void onMessage(String message) {
-                System.out.println(message);
+                observer.notifyMessage(message);
             }
         });
     }
