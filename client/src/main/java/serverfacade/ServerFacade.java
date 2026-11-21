@@ -16,51 +16,15 @@ import java.util.Collection;
 import java.util.Locale;
 
 public class ServerFacade implements ServerFacadeInterface {
-    private final HttpClient httpClient;
     final String serverAddress;
     final int serverPort;
-
-    private static final int STATUS_OK = 200;
-    private static final int STATUS_UNAUTHORIZED = 401;
-    private static final int STATUS_ERROR = 500;
-
-    private HttpRequest.Builder getUrlBuilder(String path) throws URISyntaxException {
-        String url = String.format(Locale.getDefault(), "http://%s:%d%s",serverAddress,serverPort,path);
-        HttpRequest.Builder builder = HttpRequest.newBuilder()
-                .uri(new URI(url))
-                .timeout(java.time.Duration.ofMillis(5000));
-        // Add authorization to the request if the client is logged in
-        if (ClientMain.getSingleton().authData != null) {
-            builder = builder.header("authorization",ClientMain.getSingleton().authData.authToken());
-        }
-        return builder;
-    }
-
-    private HttpResponse<String> get(String path) throws Exception {
-        HttpRequest request = getUrlBuilder(path).GET().build();
-        return httpClient.send(request,HttpResponse.BodyHandlers.ofString());
-    }
-
-    private HttpResponse<String> post(String path, String body) throws Exception {
-        HttpRequest request = getUrlBuilder(path).POST(HttpRequest.BodyPublishers.ofString(body)).build();
-        return httpClient.send(request,HttpResponse.BodyHandlers.ofString());
-    }
-
-    private HttpResponse<String> put(String path, String body) throws Exception {
-        HttpRequest request = getUrlBuilder(path).PUT(HttpRequest.BodyPublishers.ofString(body)).build();
-        return httpClient.send(request,HttpResponse.BodyHandlers.ofString());
-    }
-
-    private HttpResponse<String> delete(String path) throws Exception {
-        HttpRequest request = getUrlBuilder(path).DELETE().build();
-        return httpClient.send(request,HttpResponse.BodyHandlers.ofString());
-    }
+    HttpCommunicator http;
 
     private String serialize(Object objectToSerialize) {
         return new Gson().toJson(objectToSerialize);
     }
 
-    protected <T> T deserializeRecord(String json, Class<T> recordOfT) throws JsonSyntaxException {
+    private <T> T deserializeRecord(String json, Class<T> recordOfT) throws JsonSyntaxException {
         T record = new Gson().fromJson(json, recordOfT);
         if (recordOfT.isRecord()) {
             for (RecordComponent component : recordOfT.getRecordComponents()) {
@@ -79,14 +43,14 @@ public class ServerFacade implements ServerFacadeInterface {
     public ServerFacade(String address, int port) {
         serverAddress = address;
         serverPort = port;
-        httpClient = HttpClient.newHttpClient();
+        http = new HttpCommunicator(address,port);
     }
 
     public AuthData register(UserData userData) throws UsernameTakenException, BadRequestException {
         try {
-            var response = post("/user",serialize(userData));
+            var response = http.post("/user",serialize(userData));
             return switch (response.statusCode()) {
-                case STATUS_OK -> deserializeRecord(response.body(), AuthData.class);
+                case HttpCommunicator.STATUS_OK -> deserializeRecord(response.body(), AuthData.class);
                 case 403 -> throw new UsernameTakenException("Username already taken!");
                 default -> throw new BadRequestException("");
             };
@@ -99,10 +63,10 @@ public class ServerFacade implements ServerFacadeInterface {
 
     public AuthData login(LoginData loginData) throws InvalidUsernamePasswordException, BadRequestException {
         try {
-            var response = post("/session",serialize(loginData));
+            var response = http.post("/session",serialize(loginData));
             return switch (response.statusCode()) {
-                case STATUS_OK -> deserializeRecord(response.body(), AuthData.class);
-                case STATUS_UNAUTHORIZED -> throw new InvalidUsernamePasswordException("Username already taken!");
+                case HttpCommunicator.STATUS_OK -> deserializeRecord(response.body(), AuthData.class);
+                case HttpCommunicator.STATUS_UNAUTHORIZED -> throw new InvalidUsernamePasswordException("Username already taken!");
                 default -> throw new BadRequestException("");
             };
         }catch (InvalidUsernamePasswordException e) {
@@ -114,7 +78,7 @@ public class ServerFacade implements ServerFacadeInterface {
 
     public void logout() {
         try {
-            var response = delete("/session");
+            var response = http.delete("/session");
         }catch (Exception e){
             return;
         }
@@ -122,10 +86,10 @@ public class ServerFacade implements ServerFacadeInterface {
 
     public GameList listAllGames() throws BadRequestException, InvalidSessionException {
         try {
-            var response = get("/game");
+            var response = http.get("/game");
             return switch (response.statusCode()) {
-                case STATUS_OK -> deserializeRecord(response.body(),GameList.class);
-                case STATUS_UNAUTHORIZED -> throw new InvalidSessionException("Not authorized!");
+                case HttpCommunicator.STATUS_OK -> deserializeRecord(response.body(),GameList.class);
+                case HttpCommunicator.STATUS_UNAUTHORIZED -> throw new InvalidSessionException("Not authorized!");
                 default -> throw new BadRequestException("");
             };
         }catch (InvalidSessionException e) {
@@ -137,10 +101,10 @@ public class ServerFacade implements ServerFacadeInterface {
 
     public GameCreateResponse createGame(GameCreateParams gameCreateParams) throws BadRequestException, InvalidSessionException {
         try {
-            var response = post("/game",serialize(gameCreateParams));
+            var response = http.post("/game",serialize(gameCreateParams));
             return switch (response.statusCode()) {
-                case STATUS_OK -> deserializeRecord(response.body(),GameCreateResponse.class);
-                case STATUS_UNAUTHORIZED -> throw new InvalidSessionException("Not authorized!");
+                case HttpCommunicator.STATUS_OK -> deserializeRecord(response.body(),GameCreateResponse.class);
+                case HttpCommunicator.STATUS_UNAUTHORIZED -> throw new InvalidSessionException("Not authorized!");
                 default -> throw new BadRequestException("");
             };
         }catch (InvalidSessionException e) {
@@ -152,12 +116,12 @@ public class ServerFacade implements ServerFacadeInterface {
 
     public void joinGame(GameJoinParams joinParams) throws BadRequestException, InvalidSessionException {
         try {
-            var response = put("/game",serialize(joinParams));
+            var response = http.put("/game",serialize(joinParams));
             // We already handle not joining a taken team on the client side (when joining), so we won't handle that error here
             switch (response.statusCode()) {
-                case STATUS_OK:
+                case HttpCommunicator.STATUS_OK:
                     return;
-                case STATUS_UNAUTHORIZED:
+                case HttpCommunicator.STATUS_UNAUTHORIZED:
                     throw new InvalidSessionException("Not authorized!");
                 default:
                     throw new BadRequestException("");

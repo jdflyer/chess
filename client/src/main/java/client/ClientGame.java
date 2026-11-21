@@ -16,6 +16,11 @@ public class ClientGame {
     void initGame(GameMetadata metadata, ChessGame.TeamColor team) {
         this.metadata = metadata;
         this.team = team;
+
+        // Open connection on /ws
+        // Send CONNECT message
+        // send LOAD_GAME message, serialize board from response
+        
         game = new ChessGame();
         ui = new ChessUIMain(team == ChessGame.TeamColor.BLACK);
         ui.drawBoard(game);
