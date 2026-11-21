@@ -52,4 +52,8 @@ public class GameService {
 
         gameDAO.updateGame(new GameData(gameId, whiteUsername, blackUsername, currentGame.gameName(), currentGame.game()));
     }
+
+    public GameData getGameById(int gameId) throws InvalidGameException, DataAccessException {
+        return gameDAO.getGameById(gameId);
+    }
 }
