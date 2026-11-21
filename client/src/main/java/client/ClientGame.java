@@ -271,6 +271,11 @@ public class ClientGame implements ServerMessageObserverInterface {
                 if (fullMessage.length != 2) {
                     break;
                 }
+                if (fullMessage[1].equals(blackUsername)) {
+                    blackUsername = null;
+                }else if (fullMessage[1].equals(whiteUsername)) {
+                    whiteUsername = null;
+                }
                 System.out.println(fullMessage[1]+" has left the game.");
                 break;
             case "check":

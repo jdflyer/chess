@@ -187,12 +187,28 @@ public class WebsocketHandler {
     }
 
     private void handleLeave(WsMessageContext ctx, UserGameCommand command, GameData game, AuthData playerAuth) {
+        if (!gameIdToStringToWsContextMap.containsKey(game.gameID())) {
+            return;
+        }
+        HashMap<String, WsContext> stringToContextMap = gameIdToStringToWsContextMap.get(game.gameID());
+        if (!stringToContextMap.containsKey(playerAuth.username())) {
+            return;
+        }
+        stringToContextMap.remove(playerAuth.username());
+
+        sendNotificationToAll(game.gameID(), "leave "+playerAuth.username());
     }
 
     private void handleConnect(WsMessageContext ctx, UserGameCommand command, GameData game, AuthData playerAuth) {
         // Register this player as able to receive notifications
         HashMap<String, WsContext> stringToContextMap = gameIdToStringToWsContextMap.computeIfAbsent(
                 game.gameID(), k -> new HashMap<String, WsContext>());
+
+        if (stringToContextMap.containsKey(playerAuth.username())) {
+            sendError(ctx, "Can't join the same game twice!");
+            return;
+        }
+
         stringToContextMap.put(playerAuth.username(), ctx);
 
         sendLoadGame(ctx, game.game());
