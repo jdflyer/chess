@@ -51,13 +51,13 @@ public class ClientMain {
         state = State.LOGGED_OUT;
         authData = null;
         scanner = new Scanner(System.in);
-        facade = new ServerFacade("localhost",8080);
         clientPreLogin = new ClientPreLogin();
         clientPostLogin = new ClientPostLogin();
         clientGame = new ClientGame();
     }
 
-    void run() {
+    void run(String ip) {
+        facade = new ServerFacade(ip,8080);
         System.out.println("Welcome to Chess! Type Help for a list of available commands");
         while (getState() != State.QUIT) {
             System.out.print("["+getState().toString()+"]> ");
@@ -71,7 +71,11 @@ public class ClientMain {
     }
 
     public static void main(String[] args) {
-        SINGLETON.run();
+        String ip = "localhost";
+        if (args.length >= 1) {
+            ip = args[0];
+        }
+        SINGLETON.run(ip);
     }
 
     public static void printBadRequest() {

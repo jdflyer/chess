@@ -168,6 +168,7 @@ public class ServerFacade implements ServerFacadeInterface {
             UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.LEAVE,
                     ClientMain.getSingleton().authData.authToken(), gameId);
             ws.send(serialize(command));
+            ws = null;
             gameId = -1;
         }catch (Exception e) {
             throw new BadRequestException("Bad request");
