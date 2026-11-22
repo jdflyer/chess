@@ -16,6 +16,7 @@ import websocket.messages.ServerErrorMessage;
 import websocket.messages.ServerMessage;
 
 import javax.sound.midi.SysexMessage;
+import java.util.List;
 
 public class ClientGame implements ServerMessageObserverInterface {
     final Object gameLock = new Object();
@@ -161,6 +162,7 @@ public class ClientGame implements ServerMessageObserverInterface {
 
         try {
             ClientMain.getSingleton().facade.makeMove(move);
+            waitForNewGameState(5000);
         } catch (BadRequestException e) {
             System.out.println("The move request failed!");
         }
@@ -170,7 +172,7 @@ public class ClientGame implements ServerMessageObserverInterface {
         System.out.print("Are you sure you would like to resign? (y/n): ");
         String answer = ClientMain.getSingleton().scanner.nextLine().trim().toLowerCase();
         if (answer.equals("y") || answer.equals("yes")) {
-            // Handle resign (don't leave the game)
+            ClientMain.getSingleton().facade.resignGame();
         }
     }
 
@@ -206,6 +208,7 @@ public class ClientGame implements ServerMessageObserverInterface {
                 ui.drawBoard(game);
                 break;
             case "leave":
+                ClientMain.getSingleton().facade.leaveGame();
                 ClientMain.getSingleton().switchToLoggedInState();
                 break;
             case "move":
@@ -225,82 +228,84 @@ public class ClientGame implements ServerMessageObserverInterface {
     }
 
     void notifyNotification(NotificationMessage notification) {
-        String[] fullMessage = notification.getMessage().split("\n");
-        if (fullMessage.length== 0) {
+        List<String> fullMessage = notification.getMessage().lines().toList();
+        if (fullMessage.isEmpty()) {
             return;
         }
         System.out.print("Notification: ");
-        switch (fullMessage[0]) {
+        switch (fullMessage.get(0)) {
             case "join":
-                if (fullMessage.length != 3) {
+                if (fullMessage.size() != 3) {
                     break;
                 }
                 String teamString = "as an observer";
-                if (fullMessage[2].equals("black")) {
+                if (fullMessage.get(2).equals("black")) {
                     teamString = "the black team";
-                    blackUsername = fullMessage[1];
-                }else if (fullMessage[2].equals("white")) {
+                    blackUsername = fullMessage.get(1);
+                }else if (fullMessage.get(2).equals("white")) {
                     teamString = "the white team";
-                    whiteUsername = fullMessage[1];
+                    whiteUsername = fullMessage.get(1);
                 }
-                System.out.println(fullMessage[1]+" has joined "+teamString);
+                System.out.println(fullMessage.get(1)+" has joined "+teamString);
                 break;
             case "move":
-                if (fullMessage.length != 3) {
+                if (fullMessage.size() != 3) {
                     break;
                 }
                 // We should already have the updated board here: Read the new end position to determine
                 // which team and player made the move
-                ChessPosition endPos = stringToChessPosition(fullMessage[2]);
+                ChessPosition endPos = stringToChessPosition(fullMessage.get(2));
                 if (endPos == null) {
                     break;
                 }
                 ChessPiece pieceMoved = game.getBoard().getPiece(endPos);
                 String otherTeam = pieceMoved.getTeamColor() == ChessGame.TeamColor.BLACK ? "black" : "white";
                 String playerMoved = pieceMoved.getTeamColor() == ChessGame.TeamColor.BLACK ? blackUsername : whiteUsername;
-                System.out.println(playerMoved+" their "+otherTeam+" "+pieceMoved.getPieceType()+" from "+fullMessage[1]+
-                        " to "+fullMessage[2]);
+                System.out.println(playerMoved+" their "+otherTeam+" "+pieceMoved.getPieceType()+" from "+fullMessage.get(1)+
+                        " to "+fullMessage.get(2));
                 break;
             case "resign":
-                if (fullMessage.length != 2) {
+                if (fullMessage.size() != 2) {
                     break;
                 }
-                System.out.println(fullMessage[1]+" has resigned from the game.");
+                System.out.println(fullMessage.get(1)+" has resigned from the game.");
                 break;
             case "leave":
-                if (fullMessage.length != 2) {
+                if (fullMessage.size() != 2) {
                     break;
                 }
-                if (fullMessage[1].equals(blackUsername)) {
+                if (fullMessage.get(1).equals(blackUsername)) {
                     blackUsername = null;
-                }else if (fullMessage[1].equals(whiteUsername)) {
+                }else if (fullMessage.get(1).equals(whiteUsername)) {
                     whiteUsername = null;
                 }
-                System.out.println(fullMessage[1]+" has left the game.");
+                System.out.println(fullMessage.get(1)+" has left the game.");
                 break;
             case "check":
-                if (fullMessage.length != 2) {
+                if (fullMessage.size() != 2) {
                     break;
                 }
-                System.out.println(fullMessage[1]+" is in check.");
+                System.out.println(fullMessage.get(1)+" is in check!");
                 break;
             case "checkmate":
-                if (fullMessage.length != 2) {
+                if (fullMessage.size() != 2) {
                     break;
                 }
-                System.out.println(fullMessage[1]+" is in checkmate. The game has ended.");
+                System.out.println(fullMessage.get(1)+" is in checkmate. The game has ended.");
                 break;
             case "stalemate":
-                if (fullMessage.length != 2) {
+                if (fullMessage.size() != 2) {
                     break;
                 }
-                System.out.println(fullMessage[1]+" cannot make any more moves. The game has ended in a stalemate.");
+                System.out.println(fullMessage.get(1)+" cannot make any more moves. The game has ended in a stalemate.");
                 break;
+            default:
+                System.out.println(notification.getMessage());
         }
     }
 
     void notifyError(ServerErrorMessage error) {
-        System.out.println("Error From Server: "+error);
+        System.out.println("Error From Server: "+error.getErrorMessage());
     }
 
     void notifyLoadGame(LoadGameMessage message) {
@@ -312,7 +317,7 @@ public class ClientGame implements ServerMessageObserverInterface {
         try {
             ServerMessage serverMessage = ServerFacade.deserializeRecord(message, ServerMessage.class);
             // Clear current scanner input
-            ClientMain.getSingleton().scanner.nextLine();
+//            ClientMain.getSingleton().scanner.nextLine();
             System.out.print('\n');
             switch (serverMessage.getServerMessageType()) {
                 case NOTIFICATION:

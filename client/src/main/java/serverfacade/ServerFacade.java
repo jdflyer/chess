@@ -51,6 +51,7 @@ public class ServerFacade implements ServerFacadeInterface {
         serverAddress = address;
         serverPort = port;
         http = new HttpCommunicator(address,port);
+        gameId = -1;
     }
 
     public AuthData register(UserData userData) throws UsernameTakenException, BadRequestException {
@@ -157,6 +158,27 @@ public class ServerFacade implements ServerFacadeInterface {
         try {
             UserMoveCommand moveCommand = new UserMoveCommand(ClientMain.getSingleton().authData.authToken(), gameId, move);
             ws.send(serialize(moveCommand));
+        }catch (Exception e) {
+            throw new BadRequestException("Bad request");
+        }
+    }
+
+    public void leaveGame() throws BadRequestException {
+        try {
+            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.LEAVE,
+                    ClientMain.getSingleton().authData.authToken(), gameId);
+            ws.send(serialize(command));
+            gameId = -1;
+        }catch (Exception e) {
+            throw new BadRequestException("Bad request");
+        }
+    }
+
+    public void resignGame() throws BadRequestException {
+        try {
+            UserGameCommand command = new UserGameCommand(UserGameCommand.CommandType.RESIGN,
+                    ClientMain.getSingleton().authData.authToken(), gameId);
+            ws.send(serialize(command));
         }catch (Exception e) {
             throw new BadRequestException("Bad request");
         }

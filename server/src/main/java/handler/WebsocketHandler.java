@@ -22,6 +22,7 @@ import websocket.messages.NotificationMessage;
 import websocket.messages.ServerErrorMessage;
 import websocket.messages.ServerMessage;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class WebsocketHandler {
@@ -39,10 +40,16 @@ public class WebsocketHandler {
     }
 
     void sendError(WsMessageContext ctx, String errorString) {
+        if (!ctx.session.isOpen()) {
+            return;
+        }
         ctx.send(createErrorMessage(createErrorMessage(errorString)));
     }
 
     void sendLoadGame(WsContext ctx, ChessGame game) {
+        if (!ctx.session.isOpen()) {
+            return;
+        }
         LoadGameMessage message = new LoadGameMessage(game);
         ctx.send(new Gson().toJson(message));
     }
@@ -118,6 +125,7 @@ public class WebsocketHandler {
         catch (InvalidGameException e) {
             sendError(ctx, "Invalid game ID!");
         } catch (Exception e) {
+            System.out.println(Arrays.toString(e.getStackTrace()));
             sendError(ctx, "Error parsing message on server!");
         }
     }
@@ -197,6 +205,15 @@ public class WebsocketHandler {
     }
 
     private void handleResign(WsMessageContext ctx, UserGameCommand command, GameData game, AuthData playerAuth, ChessGame chessGame) {
+        if (!playerAuth.username().equals(game.whiteUsername()) && !playerAuth.username().equals(game.blackUsername())) {
+            sendError(ctx, "You can't resign if you aren't in the game!");
+            return;
+        }
+        if (chessGame.getGameEnded()) {
+            sendError(ctx, "You can't resign: The game has already ended");
+            return;
+        }
+
         chessGame.setGameEnded(true);
         sendNotificationToAll(game.gameID(), "resign "+playerAuth.username());
     }
@@ -226,19 +243,19 @@ public class WebsocketHandler {
         HashMap<String, WsContext> stringToContextMap = gameIdToStringToWsContextMap.computeIfAbsent(
                 game.gameID(), k -> new HashMap<String, WsContext>());
 
-        if (stringToContextMap.containsKey(playerAuth.username())) {
-            sendError(ctx, "Can't join the same game twice!");
-            return;
-        }
+//        if (stringToContextMap.containsKey(playerAuth.username())) {
+//            sendError(ctx, "Can't join the same game twice!");
+//            return;
+//        }
 
         stringToContextMap.put(playerAuth.username(), ctx);
 
         sendLoadGame(ctx, game.game());
 
         String playerTeam = "observer";
-        if (game.blackUsername().equals(playerAuth.username())) {
+        if (game.blackUsername() != null && game.blackUsername().equals(playerAuth.username())) {
             playerTeam = "black";
-        }else if (game.whiteUsername().equals(playerAuth.username())) {
+        }else if (game.whiteUsername() != null && game.whiteUsername().equals(playerAuth.username())) {
             playerTeam = "white";
         }
 
