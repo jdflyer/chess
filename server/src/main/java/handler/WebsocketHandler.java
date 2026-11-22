@@ -243,11 +243,6 @@ public class WebsocketHandler {
         HashMap<String, WsContext> stringToContextMap = gameIdToStringToWsContextMap.computeIfAbsent(
                 game.gameID(), k -> new HashMap<String, WsContext>());
 
-//        if (stringToContextMap.containsKey(playerAuth.username())) {
-//            sendError(ctx, "Can't join the same game twice!");
-//            return;
-//        }
-
         stringToContextMap.put(playerAuth.username(), ctx);
 
         sendLoadGame(ctx, game.game());
