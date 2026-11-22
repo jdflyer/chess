@@ -16,10 +16,12 @@ import websocket.messages.ServerErrorMessage;
 import websocket.messages.ServerMessage;
 
 import javax.sound.midi.SysexMessage;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ClientGame implements ServerMessageObserverInterface {
     final Object gameLock = new Object();
+    boolean gameUpdated = false;
     ChessGame game;
 
     ChessGame.TeamColor team;
@@ -33,7 +35,8 @@ public class ClientGame implements ServerMessageObserverInterface {
     boolean waitForNewGameState(int timeoutMs) {
         try {
             synchronized (gameLock) {
-                while (game == null) {
+                gameUpdated = false;
+                while (!gameUpdated) {
                     gameLock.wait(timeoutMs);
                 }
             }
@@ -47,6 +50,7 @@ public class ClientGame implements ServerMessageObserverInterface {
         synchronized (gameLock) {
             this.game = game;
             ui.drawBoard(game);
+            gameUpdated = true;
             gameLock.notifyAll();
         }
     }
@@ -96,6 +100,10 @@ public class ClientGame implements ServerMessageObserverInterface {
     void handleMove() {
         if (team == null) {
             System.out.println("Can't move! You are an observer!");
+            return;
+        }
+        if (game.getGameEnded()) {
+            System.out.println("Can't move! The game is over!");
             return;
         }
         if (game.getTeamTurn() != team) {
@@ -158,6 +166,11 @@ public class ClientGame implements ServerMessageObserverInterface {
                 }
                 move = new ChessMove(piecePos, movePos, pieceToPromoteTo);
             }
+        }
+
+        if (!game.isValidMove(move)) {
+            System.out.println("Invalid Move! No move made!");
+            return;
         }
 
         try {
@@ -228,11 +241,11 @@ public class ClientGame implements ServerMessageObserverInterface {
     }
 
     void notifyNotification(NotificationMessage notification) {
-        List<String> fullMessage = notification.getMessage().lines().toList();
+        List<String> fullMessage = List.of(notification.getMessage().split(" "));
         if (fullMessage.isEmpty()) {
             return;
         }
-        System.out.print("Notification: ");
+        System.out.print("\nNotification: ");
         switch (fullMessage.get(0)) {
             case "join":
                 if (fullMessage.size() != 3) {
@@ -261,13 +274,14 @@ public class ClientGame implements ServerMessageObserverInterface {
                 ChessPiece pieceMoved = game.getBoard().getPiece(endPos);
                 String otherTeam = pieceMoved.getTeamColor() == ChessGame.TeamColor.BLACK ? "black" : "white";
                 String playerMoved = pieceMoved.getTeamColor() == ChessGame.TeamColor.BLACK ? blackUsername : whiteUsername;
-                System.out.println(playerMoved+" their "+otherTeam+" "+pieceMoved.getPieceType()+" from "+fullMessage.get(1)+
+                System.out.println(playerMoved+" has moved their "+otherTeam+" "+pieceMoved.getPieceType()+" from "+fullMessage.get(1)+
                         " to "+fullMessage.get(2));
                 break;
             case "resign":
                 if (fullMessage.size() != 2) {
                     break;
                 }
+                game.setGameEnded(true); // Set the game as ended locally
                 System.out.println(fullMessage.get(1)+" has resigned from the game.");
                 break;
             case "leave":
@@ -302,13 +316,16 @@ public class ClientGame implements ServerMessageObserverInterface {
             default:
                 System.out.println(notification.getMessage());
         }
+        System.out.print("[GAME]> ");
     }
 
     void notifyError(ServerErrorMessage error) {
-        System.out.println("Error From Server: "+error.getErrorMessage());
+        System.out.println("\nError From Server: "+error.getErrorMessage());
+        System.out.print("[GAME]> ");
     }
 
     void notifyLoadGame(LoadGameMessage message) {
+        System.out.print("\n");
         setAndShowGameState(message.getGame());
     }
 
@@ -318,7 +335,6 @@ public class ClientGame implements ServerMessageObserverInterface {
             ServerMessage serverMessage = ServerFacade.deserializeRecord(message, ServerMessage.class);
             // Clear current scanner input
 //            ClientMain.getSingleton().scanner.nextLine();
-            System.out.print('\n');
             switch (serverMessage.getServerMessageType()) {
                 case NOTIFICATION:
                     notifyNotification(ServerFacade.deserializeRecord(message, NotificationMessage.class));
@@ -330,8 +346,6 @@ public class ClientGame implements ServerMessageObserverInterface {
                     notifyLoadGame(ServerFacade.deserializeRecord(message, LoadGameMessage.class));
                     break;
             }
-
-            System.out.print("[GAME]> ");
         }catch (JsonSyntaxException e) {
             // Invalid message was sent, don't handle it
             return;

@@ -43,7 +43,7 @@ public class WebsocketHandler {
         if (!ctx.session.isOpen()) {
             return;
         }
-        ctx.send(createErrorMessage(createErrorMessage(errorString)));
+        ctx.send(createErrorMessage(errorString));
     }
 
     void sendLoadGame(WsContext ctx, ChessGame game) {
@@ -171,7 +171,7 @@ public class WebsocketHandler {
 
         String startString = getPositionString(moveCommand.getMove().getStartPosition());
         String endString = getPositionString(moveCommand.getMove().getEndPosition());
-        sendNotificationToAllButOne(game.gameID(), playerAuth.username(), "move "+startString+endString);
+        sendNotificationToAllButOne(game.gameID(), playerAuth.username(), "move "+startString+" "+endString);
 
         if (chessGame.isInStalemate(ChessGame.TeamColor.BLACK)) {
             chessGame.setGameEnded(true);

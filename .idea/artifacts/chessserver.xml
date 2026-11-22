@@ -1,0 +1,20 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="chessserver">
+    <output-path>$PROJECT_DIR$/out/artifacts/chessserver</output-path>
+    <root id="archive" name="chessserver.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/server/src/META-INF/MANIFEST.MF" />
+      </element>
+      <element id="module-output" name="server" />
+      <element id="library" level="project" name="glassfish.tyrus.bundles.standalone.client" />
+      <element id="library" level="project" name="google.code.gson" />
+      <element id="library" level="project" name="junit.jupiter" />
+      <element id="library" level="project" name="io.javalin" />
+      <element id="library" level="project" name="lib" />
+      <element id="library" level="project" name="mysql.connector.j" />
+      <element id="library" level="project" name="mindrot.jbcrypt" />
+      <element id="library" level="project" name="slf4j.simple" />
+      <element id="module-output" name="shared" />
+    </root>
+  </artifact>
+</component>
